@@ -1,4 +1,6 @@
+using KeelteKoolV2.ApplicationServices.Services;
 using KeelteKoolV2.Core.Domain;
+using KeelteKoolV2.Core.ServiceInterface;
 using KeelteKoolV2.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +35,7 @@ namespace KeelteKoolV2.xUnitTesting
 
             services.AddLogging();
 
-            //services.AddScoped<ILanguageCoursesServices, LanguageCoursesServices>();
+            services.AddScoped<ILanguageCoursesServices, LanguageCoursesServices>();
             //services.AddScoped<IFileServices, FileServices>();
             services.AddScoped<IHostEnvironment, MockIHostEnvironment>();
 

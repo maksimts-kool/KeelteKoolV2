@@ -13,5 +13,7 @@ namespace KeelteKoolV2.Data
         {
             //set tables here
         }
+
+        public DbSet<LanguageCourse> LanguageCourses { get; set; }
     }
 }

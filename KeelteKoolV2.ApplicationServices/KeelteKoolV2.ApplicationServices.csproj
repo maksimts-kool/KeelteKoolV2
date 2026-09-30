@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\KeelteKoolV2.Core\KeelteKoolV2.Core.csproj" />
+    <ProjectReference Include="..\KeelteKoolV2.Data\KeelteKoolV2.Data.csproj" />
   </ItemGroup>
 
 </Project>
