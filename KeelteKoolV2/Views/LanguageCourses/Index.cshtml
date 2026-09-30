@@ -1,0 +1,51 @@
+@model List<KeelteKoolV2.Models.LanguageCourses.LanguageCourseViewModel>
+@{
+    ViewData["Title"] = "Keelekursused";
+}
+
+<h1>Keelekursused</h1>
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Lisa uus kursus</a>
+    </p>
+}
+
+@if (Model.Count == 0)
+{
+    <p>Keelekursusi ei ole veel lisatud.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(m => m[0].Nimetus)</th>
+                <th>@Html.DisplayNameFor(m => m[0].Keel)</th>
+                <th>@Html.DisplayNameFor(m => m[0].Tase)</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var course in Model)
+            {
+                <tr>
+                    <td>@course.Nimetus</td>
+                    <td>@course.Keel</td>
+                    <td>@course.Tase</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@course.Id">Vaata</a>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <text> | </text>
+                            <a asp-action="Update" asp-route-id="@course.Id">Muuda</a>
+                            <text> | </text>
+                            <a asp-action="Delete" asp-route-id="@course.Id">Kustuta</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

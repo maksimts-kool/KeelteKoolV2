@@ -1,0 +1,25 @@
+@model KeelteKoolV2.Models.LanguageCourses.LanguageCourseViewModel
+@{
+    ViewData["Title"] = "Kustuta kursus";
+}
+
+<h1>Kustuta kursus</h1>
+
+<h3>Kas oled kindel, et soovid selle kursuse kustutada?</h3>
+
+<dl class="row">
+    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Nimetus)</dt>
+    <dd class="col-sm-10">@Model.Nimetus</dd>
+    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Keel)</dt>
+    <dd class="col-sm-10">@Model.Keel</dd>
+    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Tase)</dt>
+    <dd class="col-sm-10">@Model.Tase</dd>
+    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Kirjeldus)</dt>
+    <dd class="col-sm-10">@Model.Kirjeldus</dd>
+</dl>
+
+<form method="post" asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Kustuta</button>
+    <a asp-action="Index" class="btn btn-secondary">Tühista</a>
+</form>

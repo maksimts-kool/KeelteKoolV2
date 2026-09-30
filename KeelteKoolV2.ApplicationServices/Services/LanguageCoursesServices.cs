@@ -15,6 +15,11 @@ namespace KeelteKoolV2.ApplicationServices.Services
             _context = context;
         }
 
+        public async Task<List<LanguageCourse>> GetAllAsync()
+        {
+            return await _context.LanguageCourses.OrderBy(x => x.Nimetus).ToListAsync();
+        }
+
         public async Task<LanguageCourse> Create(LanguageCourseDTO dto)
         {
             var course = new LanguageCourse
