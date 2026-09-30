@@ -1,7 +1,34 @@
+using KeelteKoolV2.ApplicationServices.Services;
+using KeelteKoolV2.Core.Domain;
+using KeelteKoolV2.Core.ServiceInterface;
+using KeelteKoolV2.Data;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Services
+builder.Services.AddScoped<IEmailingServices, EmailingServices>();
+
+// DbContext
+builder.Services.AddDbContext<KeelteKoolV2Context>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Identity
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = true;
+        options.Password.RequiredLength = 8;
+        options.Tokens.EmailConfirmationTokenProvider = "CustomEmailConfirmation";
+        options.Lockout.MaxFailedAccessAttempts = 3;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    })
+    .AddEntityFrameworkStores<KeelteKoolV2Context>()
+    .AddDefaultTokenProviders()
+    .AddTokenProvider<DataProtectorTokenProvider<ApplicationUser>>("CustomEmailConfirmation");
 
 var app = builder.Build();
 
