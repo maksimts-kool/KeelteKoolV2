@@ -12,6 +12,7 @@ builder.Services.AddControllersWithViews();
 
 // Services
 builder.Services.AddScoped<IEmailingServices, EmailingServices>();
+builder.Services.AddScoped<ILanguageCoursesServices, LanguageCoursesServices>();
 
 // DbContext
 builder.Services.AddDbContext<KeelteKoolV2Context>(options =>

@@ -1,0 +1,42 @@
+@model KeelteKoolV2.Models.LanguageCourses.LanguageCourseViewModel
+@{
+    var isNew = Model.Id == null;
+    ViewData["Title"] = isNew ? "Lisa kursus" : "Muuda kursust";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <form method="post" asp-action="@(isNew ? "Create" : "Update")">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group mb-3">
+                <label asp-for="Nimetus"></label>
+                <input asp-for="Nimetus" class="form-control" />
+                <span asp-validation-for="Nimetus" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Keel"></label>
+                <input asp-for="Keel" class="form-control" />
+                <span asp-validation-for="Keel" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Tase"></label>
+                <input asp-for="Tase" class="form-control" />
+                <span asp-validation-for="Tase" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Kirjeldus"></label>
+                <textarea asp-for="Kirjeldus" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="Kirjeldus" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Salvesta</button>
+            <a asp-action="Index" class="btn btn-secondary">Tühista</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
