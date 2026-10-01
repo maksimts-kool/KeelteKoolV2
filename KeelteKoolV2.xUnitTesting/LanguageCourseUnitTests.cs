@@ -14,13 +14,7 @@ namespace KeelteKoolV2.xUnitTesting
         public async Task Should_AddNewCourse_WhenResultIsReturned()
         {
             //ülesseade
-            LanguageCourseDTO newCourseDTO = new LanguageCourseDTO
-            {
-                Nimetus = "Inglise keel B2",
-                Keel = "Inglise",
-                Tase = "B2",
-                Kirjeldus = "Testkirjeldus"
-            };
+            LanguageCourseDTO newCourseDTO = MockLanguageCourseDTO();
 
             //tegevus
             var result = await Svc<ILanguageCoursesServices>().Create(newCourseDTO);
@@ -36,5 +30,41 @@ namespace KeelteKoolV2.xUnitTesting
             ning viise kuidas teste kirjutada veelgi rohkem.
             */
         }
+
+        [Fact]
+        public async Task ShouldNot_AddNewCourse_WhenFieldsAreEmpty()
+        {
+            //ülesseade
+            LanguageCourseDTO newCourseDTO = MockLanguageCourseDTO();
+            newCourseDTO.Nimetus = string.Empty;
+            newCourseDTO.Keel = string.Empty;
+
+            //tegevus
+            var result = await Svc<ILanguageCoursesServices>().Create(newCourseDTO);
+
+            //kontroll
+            Assert.Null(result);
+            if (result != null)
+            {
+            Assert.NotNull(result.Keel);
+            Assert.NotNull(result.Nimetus);
+            Assert.True(result.Keel.Length > 0);
+            Assert.True(result.Nimetus.Length < 1);
+            Assert.Equal(newCourseDTO.Keel, result.Keel);
+            }
+        }
+        private LanguageCourseDTO MockLanguageCourseDTO()
+        {
+            return new LanguageCourseDTO
+            {
+                Nimetus = "Inglise keel B2",
+                Keel = "Inglise",
+                Tase = "B2",
+                Kirjeldus = "Testkirjeldus"
+            };
+        }
+        [Fact]
+        public async Task Should_ReturnCourseDetails_WhenGuidIsNotNull()
+        {}
     }
 }
