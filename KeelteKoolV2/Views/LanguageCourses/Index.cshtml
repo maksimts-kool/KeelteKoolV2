@@ -8,7 +8,7 @@
 @if (User.Identity?.IsAuthenticated == true)
 {
     <p>
-        <a asp-action="Create" class="btn btn-primary">Lisa uus kursus</a>
+        <a asp-action="Create" class="btn btn-success">Lisa uus keelekursus</a>
     </p>
 }
 
@@ -21,6 +21,7 @@ else
     <table class="table">
         <thead>
             <tr>
+                <th>@Html.DisplayNameFor(m => m[0].Id)</th>
                 <th>@Html.DisplayNameFor(m => m[0].Nimetus)</th>
                 <th>@Html.DisplayNameFor(m => m[0].Keel)</th>
                 <th>@Html.DisplayNameFor(m => m[0].Tase)</th>
@@ -31,6 +32,7 @@ else
             @foreach (var course in Model)
             {
                 <tr>
+                    <td>@course.Id</td>
                     <td>@course.Nimetus</td>
                     <td>@course.Keel</td>
                     <td>@course.Tase</td>

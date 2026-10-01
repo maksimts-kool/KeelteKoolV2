@@ -22,7 +22,11 @@ namespace KeelteKoolV2.ApplicationServices.Services
 
         public async Task<LanguageCourse> Create(LanguageCourseDTO dto)
         {
-            var course = new LanguageCourse
+            if (dto == null)
+            {
+                return null;
+            }
+            LanguageCourse domain = new LanguageCourse
             {
                 Id = Guid.NewGuid(),
                 Nimetus = dto.Nimetus,
@@ -30,58 +34,50 @@ namespace KeelteKoolV2.ApplicationServices.Services
                 Tase = dto.Tase,
                 Kirjeldus = dto.Kirjeldus,
                 CreatedAt = DateTime.UtcNow,
-                ModifiedAt = DateTime.UtcNow,
-                ModifiedBy = dto.ModifiedBy,
+                ModifiedAt = DateTime.UtcNow
             };
-
-            await _context.LanguageCourses.AddAsync(course);
+            await _context.LanguageCourses.AddAsync(domain);
             await _context.SaveChangesAsync();
-
-            return course;
+            return domain;
         }
 
         public async Task<LanguageCourse?> DetailAsync(Guid id)
         {
-            return await _context.LanguageCourses.FirstOrDefaultAsync(x => x.Id == id);
+            LanguageCourse? domain = await _context.LanguageCourses.FirstOrDefaultAsync(x => x.Id == id);
+            return domain;
         }
 
         public async Task<LanguageCourse?> Update(LanguageCourseDTO dto)
         {
-            if (dto.Id == null)
+            if (dto == null || dto.Id == null)
             {
                 return null;
             }
-
-            var course = await _context.LanguageCourses.FirstOrDefaultAsync(x => x.Id == dto.Id);
-            if (course == null)
+            LanguageCourse? domain = await _context.LanguageCourses.FirstOrDefaultAsync(x => x.Id == dto.Id);
+            if (domain == null)
             {
                 return null;
             }
-
-            course.Nimetus = dto.Nimetus;
-            course.Keel = dto.Keel;
-            course.Tase = dto.Tase;
-            course.Kirjeldus = dto.Kirjeldus;
-            course.ModifiedAt = DateTime.UtcNow; // CreatedAt jääb samaks
-            course.ModifiedBy = dto.ModifiedBy;
-
+            domain.Nimetus = dto.Nimetus;
+            domain.Keel = dto.Keel;
+            domain.Tase = dto.Tase;
+            domain.Kirjeldus = dto.Kirjeldus;
+            domain.ModifiedAt = DateTime.UtcNow; // CreatedAt jääb samaks
+            domain.ModifiedBy = dto.ModifiedBy;
             await _context.SaveChangesAsync();
-
-            return course;
+            return domain;
         }
 
         public async Task<LanguageCourse?> Delete(Guid id)
         {
-            var course = await _context.LanguageCourses.FirstOrDefaultAsync(x => x.Id == id);
-            if (course == null)
+            LanguageCourse? domain = await _context.LanguageCourses.FirstOrDefaultAsync(x => x.Id == id);
+            if (domain == null)
             {
                 return null;
             }
-
-            _context.LanguageCourses.Remove(course);
+            _context.LanguageCourses.Remove(domain);
             await _context.SaveChangesAsync();
-
-            return course;
+            return domain;
         }
     }
 }
