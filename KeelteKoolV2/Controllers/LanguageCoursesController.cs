@@ -75,11 +75,11 @@ namespace KeelteKoolV2.Controllers
 
             var dto = new LanguageCourseDTO
             {
+                Id = vm.Id,
                 Nimetus = vm.Nimetus,
                 Keel = vm.Keel,
                 Tase = vm.Tase,
                 Kirjeldus = vm.Kirjeldus,
-                ModifiedBy = User.Identity?.Name ?? string.Empty,
             };
 
             var result = await _languageCoursesServices.Create(dto);

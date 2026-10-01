@@ -31,7 +31,7 @@
                 <textarea asp-for="Kirjeldus" class="form-control" rows="4"></textarea>
                 <span asp-validation-for="Kirjeldus" class="text-danger"></span>
             </div>
-            <button type="submit" class="btn btn-primary">Salvesta</button>
+            <input asp-action="@(isNew ? "Create" : "Update")" asp-controller="LanguageCourses" type="submit" value="Salvesta" class="btn btn-primary" />
             <a asp-action="Index" class="btn btn-secondary">Tühista</a>
         </form>
     </div>
