@@ -1,0 +1,23 @@
+﻿@model KeelteKoolV2.Models.LanguageCourses.LanguageCourseViewModel
+<h1>Kustuta keelekursus</h1>
+
+<div>
+    <h4>Kas oled kindel, et soovid selle kursuse kustutada?</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Nimetus)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(m => m.Nimetus)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Keel)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(m => m.Keel)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Tase)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(m => m.Tase)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Kirjeldus)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(m => m.Kirjeldus)</dd>
+    </dl>
+
+    <form asp-action="Delete" asp-controller="LanguageCourses" method="post">
+        <input type="hidden" name="id" value="@Model.Id" />
+        <input type="submit" value="Kustuta" class="btn btn-danger" />
+        <a asp-action="Index" asp-controller="LanguageCourses" class="btn btn-secondary">Tühista</a>
+    </form>
+</div>

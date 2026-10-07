@@ -25,9 +25,10 @@ namespace KeelteKoolV2.Controllers
             var result = _context.LanguageCourses
                 .Select(x => new LanguageCourseViewModel
                 {
+                    Id = x.Id,
                     Nimetus = x.Nimetus,
                     Keel = x.Keel,
-                }).Take(20).OrderBy(x => x.Keel);
+                }).OrderBy(x => x.Keel).Take(20);
             return View(result);
 
         }
@@ -77,6 +78,99 @@ namespace KeelteKoolV2.Controllers
                 //  kui ei, suuname tagasi indeksisse
                 return RedirectToAction(nameof(Index));
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Details(Guid id)
+        {
+            var course = await _languageCoursesServices.DetailsAsync(id);
+            if (course == null)
+            {
+                return NotFound();
+            }
+            var vm = new LanguageCourseViewModel
+            {
+                Id = course.Id,
+                Nimetus = course.Nimetus,
+                Keel = course.Keel,
+                Tase = course.Tase,
+                Kirjeldus = course.Kirjeldus
+            };
+            return View(vm);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Update(Guid id)
+        {
+            var course = await _languageCoursesServices.DetailsAsync(id);
+            if (course == null)
+            {
+                return NotFound();
+            }
+            var vm = new LanguageCourseViewModel
+            {
+                Id = course.Id,
+                Nimetus = course.Nimetus,
+                Keel = course.Keel,
+                Tase = course.Tase,
+                Kirjeldus = course.Kirjeldus
+            };
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Update(LanguageCourseViewModel vm)
+        {
+            if (vm == null || !ModelState.IsValid)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+            var dto = new LanguageCourseDTO()
+            {
+                Id = vm.Id,
+                Nimetus = vm.Nimetus,
+                Keel = vm.Keel,
+                Tase = vm.Tase,
+                Kirjeldus = vm.Kirjeldus
+            };
+            var result = await _languageCoursesServices.Update(dto);
+            if (result == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var course = await _languageCoursesServices.DetailsAsync(id);
+            if (course == null)
+            {
+                return NotFound();
+            }
+            var vm = new LanguageCourseViewModel
+            {
+                Id = course.Id,
+                Nimetus = course.Nimetus,
+                Keel = course.Keel,
+                Tase = course.Tase,
+                Kirjeldus = course.Kirjeldus
+            };
+            return View(vm);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        {
+            var result = await _languageCoursesServices.Delete(id);
+            if (result == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+            return RedirectToAction(nameof(Index));
         }
     }
 }
