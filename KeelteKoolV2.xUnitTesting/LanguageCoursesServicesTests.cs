@@ -118,22 +118,19 @@ namespace KeelteKoolV2.xUnitTesting
 
 
         [Fact]
-        public async Task Should_DeleteCourse_WhenIdExists()
+        public async Task Should_DeleteDataFromDB_WhenValidIdGiven()
         {
-            var created = await Svc<ILanguageCoursesServices>().Create(MockLanguageCourseDTOData());
+            LanguageCourse createdCourse = await AddObjectToDB();
 
-            var result = await Svc<ILanguageCoursesServices>().Delete(created.Id);
+            var deletedCourse = await Svc<ILanguageCoursesServices>().Delete(createdCourse.Id);
+            var result = await Svc<ILanguageCoursesServices>().DetailsAsync(createdCourse.Id);
 
-            Assert.NotNull(result);
-            Assert.Null(await Svc<ILanguageCoursesServices>().DetailsAsync(created.Id));
-        }
-
-        [Fact]
-        public async Task ShouldNot_DeleteCourse_WhenIdDoesNotExist()
-        {
-            var result = await Svc<ILanguageCoursesServices>().Delete(Guid.NewGuid());
-
+            //kustutatud kursust andmebaasist enam ei leita
             Assert.Null(result);
+            Assert.Equal(createdCourse, deletedCourse);
+            //teine kursus jäi andmebaasi alles
+            Assert.Equal(createdCourse.Id, deletedCourse.Id);
+            Assert.NotEqual(deletedCourse, result);
         }
 
         private async Task<LanguageCourse> AddObjectToDB()

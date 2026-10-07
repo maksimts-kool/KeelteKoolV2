@@ -96,7 +96,8 @@ namespace KeelteKoolV2.Controllers
                 Tase = course.Tase,
                 Kirjeldus = course.Kirjeldus
             };
-            return View(vm);
+            ViewData["ViewType"] = "details";
+            return View("DetailsDelete", vm);
         }
 
         [HttpGet]
@@ -160,7 +161,8 @@ namespace KeelteKoolV2.Controllers
                 Tase = course.Tase,
                 Kirjeldus = course.Kirjeldus
             };
-            return View(vm);
+            ViewData["ViewType"] = "delete";
+            return View("DetailsDelete", vm);
         }
 
         [HttpPost, ActionName("Delete")]
