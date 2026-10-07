@@ -1,53 +1,39 @@
-@model List<KeelteKoolV2.Models.LanguageCourses.LanguageCourseViewModel>
+﻿@model IEnumerable<KeelteKoolV2.Models.LanguageCourses.LanguageCourseViewModel>
 @{
-    ViewData["Title"] = "Keelekursused";
+    int rownumber = 1;
+    ViewBag.Title = "Keelekursused";
 }
+@* Later check for role of the user, hide this button if not admin or teacher \/ *@
+<div>
+    <a asp-action="create" asp-controller="LanguageCourses" type="submit" class="btn btn-dark">Lisa uus keelekursus</a>
+</div>
 
-<h1>Keelekursused</h1>
-
-@if (User.Identity?.IsAuthenticated == true)
-{
-    <p>
-        <a asp-action="Create" class="btn btn-success">Lisa uus keelekursus</a>
-    </p>
-}
-
-@if (Model.Count == 0)
-{
-    <p>Keelekursusi ei ole veel lisatud.</p>
-}
-else
-{
-    <table class="table">
+<div class="h1">
+    Keelekursused
+</div>
+<form method="get">
+    <table class="table table-hover">
         <thead>
             <tr>
-                <th>@Html.DisplayNameFor(m => m[0].Id)</th>
-                <th>@Html.DisplayNameFor(m => m[0].Nimetus)</th>
-                <th>@Html.DisplayNameFor(m => m[0].Keel)</th>
-                <th>@Html.DisplayNameFor(m => m[0].Tase)</th>
-                <th></th>
+                <th scope="col">Nr</th>
+                <th scope="col">Nimetus</th>
+                <th scope="col">Õpetatav keel</th>
+                <th scope="col">Tegevused</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var course in Model)
-            {
-                <tr>
-                    <td>@course.Id</td>
-                    <td>@course.Nimetus</td>
-                    <td>@course.Keel</td>
-                    <td>@course.Tase</td>
-                    <td>
-                        <a asp-action="Details" asp-route-id="@course.Id">Vaata</a>
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <text> | </text>
-                            <a asp-action="Update" asp-route-id="@course.Id">Muuda</a>
-                            <text> | </text>
-                            <a asp-action="Delete" asp-route-id="@course.Id">Kustuta</a>
-                        }
-                    </td>
-                </tr>
-            }
+                {
+                    <tr>
+                        <td>@rownumber</td>
+                        <td>@course.Nimetus</td>
+                        <td>@course.Keel</td>
+                        <td>
+                            TODO: add details, update and delete functionality from controller
+                        </td>
+                    </tr>
+                    rownumber++;
+                }
         </tbody>
     </table>
-}
+</form>

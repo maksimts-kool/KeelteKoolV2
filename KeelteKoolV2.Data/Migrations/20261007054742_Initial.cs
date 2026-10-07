@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace KeelteKoolV2.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class identity_init : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -51,6 +51,24 @@ namespace KeelteKoolV2.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LanguageCourses",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Nimetus = table.Column<string>(type: "TEXT", nullable: false),
+                    Keel = table.Column<string>(type: "TEXT", nullable: false),
+                    Tase = table.Column<string>(type: "TEXT", nullable: false),
+                    Kirjeldus = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    ModifiedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LanguageCourses", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -214,6 +232,9 @@ namespace KeelteKoolV2.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "LanguageCourses");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

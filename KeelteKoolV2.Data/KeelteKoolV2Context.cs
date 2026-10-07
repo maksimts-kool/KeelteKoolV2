@@ -11,9 +11,8 @@ namespace KeelteKoolV2.Data
     {
         public KeelteKoolV2Context(DbContextOptions<KeelteKoolV2Context> options):base (options) 
         {
-            //set tables here
         }
-
-        public DbSet<LanguageCourse> LanguageCourses { get; set; }
+            //set tables here
+            public DbSet<LanguageCourse> LanguageCourses { get; set; }
     }
 }

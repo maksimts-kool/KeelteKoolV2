@@ -113,7 +113,6 @@ namespace KeelteKoolV2.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ModifiedBy")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Nimetus")
