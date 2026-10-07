@@ -60,26 +60,17 @@ namespace KeelteKoolV2.ApplicationServices.Services
         }
         public async Task<LanguageCourse> Update(LanguageCourseDTO dto)
         {
-            if (dto == null || dto.Id == null)
-            {
-                return null;
-            }
-            if (string.IsNullOrEmpty(dto.Nimetus) || string.IsNullOrEmpty(dto.Keel))
-            {
-                return null;
-            }
-            var domain = await _context.LanguageCourses
-                .FirstOrDefaultAsync(x => x.Id == dto.Id);
-            if (domain == null)
-            {
-                return null;
-            }
+            LanguageCourse domain = new LanguageCourse();
+
+            domain.Id = (Guid)dto.Id;
             domain.Nimetus = dto.Nimetus;
             domain.Keel = dto.Keel;
             domain.Tase = dto.Tase;
             domain.Kirjeldus = dto.Kirjeldus;
             domain.ModifiedAt = DateTime.Now;
+            domain.CreatedAt = (DateTime)dto.CreatedAt;
 
+            _context.LanguageCourses.Update(domain);
             await _context.SaveChangesAsync();
             return domain;
         }

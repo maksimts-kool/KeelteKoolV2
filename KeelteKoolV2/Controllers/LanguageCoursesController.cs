@@ -113,7 +113,8 @@ namespace KeelteKoolV2.Controllers
                 Nimetus = course.Nimetus,
                 Keel = course.Keel,
                 Tase = course.Tase,
-                Kirjeldus = course.Kirjeldus
+                Kirjeldus = course.Kirjeldus,
+                CreatedAt = course.CreatedAt
             };
             return View(vm);
         }
@@ -132,7 +133,8 @@ namespace KeelteKoolV2.Controllers
                 Nimetus = vm.Nimetus,
                 Keel = vm.Keel,
                 Tase = vm.Tase,
-                Kirjeldus = vm.Kirjeldus
+                Kirjeldus = vm.Kirjeldus,
+                CreatedAt = vm.CreatedAt
             };
             var result = await _languageCoursesServices.Update(dto);
             if (result == null)
