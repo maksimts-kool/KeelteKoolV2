@@ -1,5 +1,7 @@
-﻿using KeelteKoolV2.Core.DTO;
+﻿using KeelteKoolV2.Core.Domain;
+using KeelteKoolV2.Core.DTO;
 using KeelteKoolV2.Core.ServiceInterface;
+using KeelteKoolV2.Data;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -87,32 +89,32 @@ namespace KeelteKoolV2.xUnitTesting
             Assert.Equal(result, createdCourse);
         }
 
-
         [Fact]
-        public async Task Should_UpdateCourse_WhenIdExists()
+        public async Task Should_UpdateWithNewData_WhenDataIsDifferentFromDB()
         {
-            var created = await Svc<ILanguageCoursesServices>().Create(MockLanguageCourseDTOData());
-            var dto = MockLanguageCourseDTOData();
-            dto.Id = created.Id;
-            dto.Nimetus = "UuendatudKursus";
+            LanguageCourse createdCourse = await AddObjectToDB();
+            //salvestame algse nime enne uuendust, sest InMemory andmebaas tagastab sama jälgitava objekti
+            string originalNimetus = createdCourse.Nimetus;
+            //kõik testid jagavad ühte andmebaasi konteksti, seega eemaldame jälgimisest, et Update saaks sama id-ga objekti uuesti lisada
+            Svc<KeelteKoolV2Context>().ChangeTracker.Clear();
+            LanguageCourseDTO updatedCourse = new LanguageCourseDTO();
+            updatedCourse.Id = createdCourse.Id;
+            updatedCourse.Keel = createdCourse.Keel;
+            updatedCourse.Kirjeldus = createdCourse.Kirjeldus;
+            updatedCourse.Nimetus = "Uusnimetus";
+            updatedCourse.ModifiedAt = DateTime.UtcNow;
+            updatedCourse.CreatedAt = createdCourse.CreatedAt;
 
-            var result = await Svc<ILanguageCoursesServices>().Update(dto);
-
+            LanguageCourse result = await Svc<ILanguageCoursesServices>().Update(updatedCourse);
+            
             Assert.NotNull(result);
-            Assert.Equal(created.Id, result.Id);
-            Assert.Equal("UuendatudKursus", result.Nimetus);
+            Assert.Equal(updatedCourse.Id, result.Id);
+            Assert.Equal(updatedCourse.Keel, result.Keel);
+            Assert.Equal(updatedCourse.Kirjeldus, result.Kirjeldus);
+            Assert.Equal(updatedCourse.Tase, result.Tase);
+            Assert.NotEqual(originalNimetus, result.Nimetus);
         }
 
-        [Fact]
-        public async Task ShouldNot_UpdateCourse_WhenIdDoesNotExist()
-        {
-            var dto = MockLanguageCourseDTOData();
-            dto.Id = Guid.NewGuid();
-
-            var result = await Svc<ILanguageCoursesServices>().Update(dto);
-
-            Assert.Null(result);
-        }
 
         [Fact]
         public async Task Should_DeleteCourse_WhenIdExists()
@@ -131,6 +133,12 @@ namespace KeelteKoolV2.xUnitTesting
             var result = await Svc<ILanguageCoursesServices>().Delete(Guid.NewGuid());
 
             Assert.Null(result);
+        }
+
+        private async Task<LanguageCourse> AddObjectToDB()
+        {
+            //lisab andmebaasi testkursuse teenuse kaudu ja tagastab selle
+            return await Svc<ILanguageCoursesServices>().Create(MockLanguageCourseDTOData());
         }
 
         private LanguageCourseDTO MockLanguageCourseDTOData()
