@@ -88,6 +88,51 @@ namespace KeelteKoolV2.xUnitTesting
         }
 
 
+        [Fact]
+        public async Task Should_UpdateCourse_WhenIdExists()
+        {
+            var created = await Svc<ILanguageCoursesServices>().Create(MockLanguageCourseDTOData());
+            var dto = MockLanguageCourseDTOData();
+            dto.Id = created.Id;
+            dto.Nimetus = "UuendatudKursus";
+
+            var result = await Svc<ILanguageCoursesServices>().Update(dto);
+
+            Assert.NotNull(result);
+            Assert.Equal(created.Id, result.Id);
+            Assert.Equal("UuendatudKursus", result.Nimetus);
+        }
+
+        [Fact]
+        public async Task ShouldNot_UpdateCourse_WhenIdDoesNotExist()
+        {
+            var dto = MockLanguageCourseDTOData();
+            dto.Id = Guid.NewGuid();
+
+            var result = await Svc<ILanguageCoursesServices>().Update(dto);
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task Should_DeleteCourse_WhenIdExists()
+        {
+            var created = await Svc<ILanguageCoursesServices>().Create(MockLanguageCourseDTOData());
+
+            var result = await Svc<ILanguageCoursesServices>().Delete(created.Id);
+
+            Assert.NotNull(result);
+            Assert.Null(await Svc<ILanguageCoursesServices>().DetailsAsync(created.Id));
+        }
+
+        [Fact]
+        public async Task ShouldNot_DeleteCourse_WhenIdDoesNotExist()
+        {
+            var result = await Svc<ILanguageCoursesServices>().Delete(Guid.NewGuid());
+
+            Assert.Null(result);
+        }
+
         private LanguageCourseDTO MockLanguageCourseDTOData()
         {
             return new LanguageCourseDTO

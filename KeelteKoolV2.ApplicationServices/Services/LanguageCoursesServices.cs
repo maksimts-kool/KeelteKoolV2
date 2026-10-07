@@ -2,6 +2,7 @@
 using KeelteKoolV2.Core.DTO;
 using KeelteKoolV2.Core.ServiceInterface;
 using KeelteKoolV2.Data;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -34,16 +35,18 @@ namespace KeelteKoolV2.ApplicationServices.Services
             domain.Nimetus = "";
             domain.Keel = "";
             //if nimetus empty, return null
-            if (domain.Nimetus.Length < 1)
+            if (dto.Nimetus.Length < 1)
             {
                 return null;
             }
-            if (domain.Keel.Length < 1)
+            if (dto.Keel.Length < 1)
             {
                 return null;
             }
             domain.Kirjeldus = dto.Kirjeldus;
             domain.Tase = dto.Tase;
+            domain.Keel = dto.Keel;
+            domain.Nimetus = dto.Nimetus;
             domain.CreatedAt = DateTime.Now;
             domain.ModifiedAt = DateTime.Now;
             //later, require user id to be attached to "ModifiedBy" parameter, to know who modified last.
@@ -57,15 +60,46 @@ namespace KeelteKoolV2.ApplicationServices.Services
         }
         public async Task<LanguageCourse> Update(LanguageCourseDTO dto)
         {
-            return null;
+            if (dto == null || dto.Id == null)
+            {
+                return null;
+            }
+            if (string.IsNullOrEmpty(dto.Nimetus) || string.IsNullOrEmpty(dto.Keel))
+            {
+                return null;
+            }
+            var domain = await _context.LanguageCourses
+                .FirstOrDefaultAsync(x => x.Id == dto.Id);
+            if (domain == null)
+            {
+                return null;
+            }
+            domain.Nimetus = dto.Nimetus;
+            domain.Keel = dto.Keel;
+            domain.Tase = dto.Tase;
+            domain.Kirjeldus = dto.Kirjeldus;
+            domain.ModifiedAt = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+            return domain;
         }
         public async Task<LanguageCourse> DetailsAsync(Guid id)
         {
-            return null;
+            var result = await _context.LanguageCourses
+                .FirstOrDefaultAsync(x => x.Id == id);
+            return result;
         }
         public async Task<LanguageCourse> Delete(Guid id)
         {
-            return null;
+            var domain = await _context.LanguageCourses
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (domain == null)
+            {
+                return null;
+            }
+            _context.LanguageCourses.Remove(domain);
+            await _context.SaveChangesAsync();
+            return domain;
         }
     }
 }
