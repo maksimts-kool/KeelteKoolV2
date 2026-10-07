@@ -1,183 +1,82 @@
-using KeelteKoolV2.Core.Domain;
-using KeelteKoolV2.Core.DTO;
+﻿using KeelteKoolV2.Core.DTO;
 using KeelteKoolV2.Core.ServiceInterface;
+using KeelteKoolV2.Data;
 using KeelteKoolV2.Models.LanguageCourses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KeelteKoolV2.Controllers
 {
-    [Authorize]
     public class LanguageCoursesController : Controller
     {
+        private readonly KeelteKoolV2Context _context;
         private readonly ILanguageCoursesServices _languageCoursesServices;
 
-        public LanguageCoursesController(ILanguageCoursesServices languageCoursesServices)
+        public LanguageCoursesController(KeelteKoolV2Context context, ILanguageCoursesServices languageCoursesServices)
         {
+            _context = context;
             _languageCoursesServices = languageCoursesServices;
         }
-        // Sisukord:
-        //
-        // Nimekiri ja detailvaade (avalik)
-        // Lisamine
-        // Muutmine
-        // Kustutamine
-
-        /*     N I M E K I R I     J A     D E T A I L V A A D E     */
-
-        /// <summary>
-        /// Näitab kõiki keelekursusi
-        /// </summary>
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var courses = await _languageCoursesServices.GetAllAsync();
+            ////gets everything
+            //var result = _context.LanguageCourses.ToList();
+            // get only some, with limited info
+            var result = _context.LanguageCourses
+                .Select(x => new LanguageCourseViewModel
+                {
+                    Nimetus = x.Nimetus,
+                    Keel = x.Keel,
+                }).Take(20).OrderBy(x => x.Keel);
+            return View(result);
 
-            return View(courses.Select(ToViewModel).ToList());
         }
-
-        /// <summary>
-        /// Näitab ühe kursuse andmeid
-        /// </summary>
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> Details(Guid id)
-        {
-            var course = await _languageCoursesServices.DetailAsync(id);
-            if (course == null)
-            {
-                return NotFound();
-            }
-
-            return View(ToViewModel(course));
-        }
-
-        /*     L I S A M I N E     */
 
         [HttpGet]
         public IActionResult Create()
         {
-            return View("CreateUpdate", new LanguageCourseViewModel());
+            LanguageCourseViewModel vm = new();
+            return View(vm);
         }
-
         [HttpPost]
-        public async Task<IActionResult> Create(LanguageCourseViewModel vm)
+        [ValidateAntiForgeryToken]
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Create(LanguageCourseViewModel vm) 
         {
+            //kontrollime et vm ei oleks null
             if (vm == null)
             {
                 return RedirectToAction("Error", "Home");
             }
+            //kontrollime et vmi modelstate on õige
             if (!ModelState.IsValid)
             {
                 return RedirectToAction("Error", "Home");
             }
-
-            var dto = new LanguageCourseDTO
+            //teeme uue DTO-objekti
+            //asetame dtosse vmi andmed
+            var dto = new LanguageCourseDTO() 
             {
                 Id = vm.Id,
                 Nimetus = vm.Nimetus,
                 Keel = vm.Keel,
                 Tase = vm.Tase,
-                Kirjeldus = vm.Kirjeldus,
+                Kirjeldus = vm.Kirjeldus
             };
-
+            //teostatakse päring teenusele
             var result = await _languageCoursesServices.Create(dto);
-
+            //teenus peab objekti tagastama
+            //kontrollime kas tagastatud objekt on null
             if (result == null)
             {
+                //  kui on, suuname vealehele
                 return RedirectToAction("Error", "Home");
             }
             else
             {
+                //  kui ei, suuname tagasi indeksisse
                 return RedirectToAction(nameof(Index));
             }
-        }
-
-        /*     M U U T M I N E     */
-
-        [HttpGet]
-        public async Task<IActionResult> Update(Guid id)
-        {
-            var course = await _languageCoursesServices.DetailAsync(id);
-            if (course == null)
-            {
-                return NotFound();
-            }
-
-            return View("CreateUpdate", ToViewModel(course));
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Update(LanguageCourseViewModel vm)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View("CreateUpdate", vm);
-            }
-
-            var course = await _languageCoursesServices.Update(ToDto(vm));
-            if (course == null)
-            {
-                return NotFound();
-            }
-
-            return RedirectToAction(nameof(Details), new { id = course.Id });
-        }
-
-        /*     K U S T U T A M I N E     */
-
-        [HttpGet]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var course = await _languageCoursesServices.DetailAsync(id);
-            if (course == null)
-            {
-                return NotFound();
-            }
-
-            return View(ToViewModel(course));
-        }
-
-        [HttpPost, ActionName("Delete")]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
-        {
-            var course = await _languageCoursesServices.Delete(id);
-            if (course == null)
-            {
-                return NotFound();
-            }
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        /* üleval tegevused, all abimeetodid */
-
-        private static LanguageCourseViewModel ToViewModel(LanguageCourse course)
-        {
-            return new LanguageCourseViewModel
-            {
-                Id = course.Id,
-                Nimetus = course.Nimetus,
-                Keel = course.Keel,
-                Tase = course.Tase,
-                Kirjeldus = course.Kirjeldus,
-            };
-        }
-
-        // CreatedAt ja ModifiedAt paneb service ise, ModifiedBy tuleb sisselogitud kasutajalt
-        // (ViewModel neid ei sisalda, sest kasutaja ei tohi neid ise määrata)
-        private LanguageCourseDTO ToDto(LanguageCourseViewModel vm)
-        {
-            return new LanguageCourseDTO
-            {
-                Id = vm.Id,
-                Nimetus = vm.Nimetus,
-                Keel = vm.Keel,
-                Tase = vm.Tase,
-                Kirjeldus = vm.Kirjeldus,
-                ModifiedBy = User.Identity?.Name ?? string.Empty,
-            };
         }
     }
 }
