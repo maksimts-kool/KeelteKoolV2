@@ -101,6 +101,7 @@ namespace KeelteKoolV2.xUnitTesting
             updatedCourse.Id = createdCourse.Id;
             updatedCourse.Keel = createdCourse.Keel;
             updatedCourse.Kirjeldus = createdCourse.Kirjeldus;
+            updatedCourse.Tase = createdCourse.Tase;
             updatedCourse.Nimetus = "Uusnimetus";
             updatedCourse.ModifiedAt = DateTime.UtcNow;
             updatedCourse.CreatedAt = createdCourse.CreatedAt;
@@ -111,8 +112,8 @@ namespace KeelteKoolV2.xUnitTesting
             Assert.Equal(updatedCourse.Id, result.Id);
             Assert.Equal(updatedCourse.Keel, result.Keel);
             Assert.Equal(updatedCourse.Kirjeldus, result.Kirjeldus);
-            Assert.Equal(updatedCourse.Tase, result.Tase);
-            Assert.NotEqual(originalNimetus, result.Nimetus);
+            Assert.Matches(updatedCourse.Tase, result.Tase);
+            Assert.DoesNotMatch(originalNimetus, result.Nimetus);
         }
 
 
