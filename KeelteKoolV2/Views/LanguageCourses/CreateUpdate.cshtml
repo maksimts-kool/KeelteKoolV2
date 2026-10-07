@@ -1,12 +1,18 @@
 ﻿@model KeelteKoolV2.Models.LanguageCourses.LanguageCourseViewModel
 
-@* separate update create *@
+@* sama vorm on nii loomiseks kui uuendamiseks, Id olemasolu järgi valitakse tegevus *@
+@{
+    bool isUpdate = Model.Id != null;
+}
+
+<h1>@(isUpdate ? "Uuenda keelekursust" : "Loo keelekursus")</h1>
 
 <div>
     <form method="post" enctype="multipart/form-data">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
         <input asp-for="Id" type="hidden"/>
+        <input asp-for="CreatedAt" type="hidden"/>
 
         <div class="form-group">
             <label asp-for="Nimetus" class="control-label"></label>
@@ -32,9 +38,15 @@
             <span asp-validation-for="Kirjeldus" class="text-danger"></span>
         </div>
 
-        @* create only, later add update, checkforid *@
-
-        <input asp-action="create" asp-controller="LanguageCourses" type="submit" value="Loo Keelekursus" class="btn btn-success"/>
+        @if (isUpdate)
+        {
+            <input asp-action="Update" asp-controller="LanguageCourses" type="submit" value="Salvesta" class="btn btn-success"/>
+            <a asp-action="Index" asp-controller="LanguageCourses" class="btn btn-secondary">Tühista</a>
+        }
+        else
+        {
+            <input asp-action="Create" asp-controller="LanguageCourses" type="submit" value="Loo Keelekursus" class="btn btn-success"/>
+        }
 
     </form>
 </div>

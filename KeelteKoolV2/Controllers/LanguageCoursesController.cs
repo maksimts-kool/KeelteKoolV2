@@ -37,7 +37,7 @@ namespace KeelteKoolV2.Controllers
         public IActionResult Create()
         {
             LanguageCourseViewModel vm = new();
-            return View(vm);
+            return View("CreateUpdate", vm);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -116,7 +116,7 @@ namespace KeelteKoolV2.Controllers
                 Kirjeldus = course.Kirjeldus,
                 CreatedAt = course.CreatedAt
             };
-            return View(vm);
+            return View("CreateUpdate", vm);
         }
 
         [HttpPost]
