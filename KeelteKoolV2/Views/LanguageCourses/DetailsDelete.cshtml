@@ -1,0 +1,36 @@
+@model KeelteKoolV2.Models.LanguageCourses.LanguageCourseViewModel
+@{
+    bool isDelete = (ViewData["ViewType"] as string) == "delete";
+}
+<h1>@(isDelete ? "Kustuta keelekursus" : "Andmed")</h1>
+
+<div>
+    <h4>@(isDelete ? "Kas oled kindel, et soovid selle kursuse kustutada?" : "Keelekursus")</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Id)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(m => m.Id)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Nimetus)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(m => m.Nimetus)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Keel)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(m => m.Keel)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Kirjeldus)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(m => m.Kirjeldus)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Tase)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(m => m.Tase)</dd>
+    </dl>
+
+    @if (isDelete)
+    {
+        <form asp-action="Delete" asp-controller="LanguageCourses" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <input type="submit" value="Kustuta" class="btn btn-danger" />
+            <a asp-action="Index" asp-controller="LanguageCourses" class="btn btn-secondary">Tühista</a>
+        </form>
+    }
+    else
+    {
+        <a asp-action="Update" asp-controller="LanguageCourses" asp-route-id="@Model.Id" class="btn btn-warning">Muuda</a>
+        <a asp-action="Index" asp-controller="LanguageCourses" class="btn btn-primary">Tagasi</a>
+    }
+</div>
