@@ -92,6 +92,26 @@ namespace KeelteKoolV2.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("KeelteKoolV2.Core.Domain.FileToDatabase", b =>
+                {
+                    b.Property<Guid>("ImageID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("ImageData")
+                        .HasColumnType("BLOB");
+
+                    b.Property<string>("ImageTitle")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("LecturerId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ImageID");
+
+                    b.ToTable("Files");
+                });
+
             modelBuilder.Entity("KeelteKoolV2.Core.Domain.LanguageCourse", b =>
                 {
                     b.Property<Guid>("Id")
@@ -126,6 +146,37 @@ namespace KeelteKoolV2.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("LanguageCourses");
+                });
+
+            modelBuilder.Entity("KeelteKoolV2.Core.Domain.Lecturer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Qualifications")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserID")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Lecturers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

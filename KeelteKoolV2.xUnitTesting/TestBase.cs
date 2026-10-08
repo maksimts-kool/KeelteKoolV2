@@ -1,4 +1,4 @@
-﻿using KeelteKoolV2.ApplicationServices.Services;
+using KeelteKoolV2.ApplicationServices.Services;
 using KeelteKoolV2.Core.ServiceInterface;
 using KeelteKoolV2.Data;
 using KeelteKoolV2.xUnitTesting.Macros;
@@ -29,7 +29,8 @@ namespace KeelteKoolV2.xUnitTesting
         public virtual void SetupServices(IServiceCollection services)
         {
             services.AddScoped<ILanguageCoursesServices, LanguageCoursesServices>();
-            //services.AddScoped<IFileServices, FileServices>();
+            services.AddScoped<ILecturersServices, LecturersServices>();
+            services.AddScoped<IFileServices, FileServices>();
             services.AddScoped<IHostEnvironment, MockIHostEnvironment>();
 
             services.AddDbContext<KeelteKoolV2Context>
