@@ -1,0 +1,41 @@
+@model KeelteKoolV2.Models.Lecturers.LecturerViewModel
+@{
+    bool isDelete = (ViewData["ViewType"] as string) == "delete";
+}
+<h1>@(isDelete ? "Kustuta õppejõud" : "Andmed")</h1>
+
+<div>
+    <h4>@(isDelete ? "Kas oled kindel, et soovid selle õppejõu kustutada?" : "Õppejõud")</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Id)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(m => m.Id)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.FirstName)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(m => m.FirstName)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.LastName)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(m => m.LastName)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Qualifications)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(m => m.Qualifications)</dd>
+        <dt class="col-sm-2">Pildid</dt>
+        <dd class="col-sm-10">
+            @foreach (var image in Model.Image)
+            {
+                <img src="@image.Image" alt="@image.ImageTitle" style="max-height:120px" />
+            }
+        </dd>
+    </dl>
+
+    @if (isDelete)
+    {
+        <form asp-action="Delete" asp-controller="Lecturers" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <input type="submit" value="Kustuta" class="btn btn-danger" />
+            <a asp-action="Index" asp-controller="Lecturers" class="btn btn-secondary">Tühista</a>
+        </form>
+    }
+    else
+    {
+        <a asp-action="Update" asp-controller="Lecturers" asp-route-id="@Model.Id" class="btn btn-warning">Muuda</a>
+        <a asp-action="Index" asp-controller="Lecturers" class="btn btn-primary">Tagasi</a>
+    }
+</div>
