@@ -12,10 +12,6 @@ public class LecturersServicesTests : TestBase
     public async Task ShouldNot_AddNewLecturer_WhenResultIsReturned()
     {
         LecturerDTO newLecturer = MockLecturerDTOData();
-        newLecturer.FirstName = "Test";
-        newLecturer.LastName = "Test";
-        //newLecturer.Image
-        newLecturer.Qualifications = "Testicle";
 
         var result = await Svc<ILecturersServices>().Create(newLecturer);
 
