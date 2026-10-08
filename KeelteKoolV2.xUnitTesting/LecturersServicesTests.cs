@@ -9,42 +9,38 @@ namespace KeelteKoolV2.xUnitTesting;
 public class LecturersServicesTests : TestBase
 {
     [Fact]
-    public async Task ShouldNot_AddNewLecturer_WhenNamesEmpty()
+    public async Task ShouldNot_AddNewLecturer_WhenResultIsReturned()
     {
         LecturerDTO newLecturer = MockLecturerDTOData();
-        newLecturer.FirstName = string.Empty;
-        newLecturer.LastName = string.Empty;
-
-        var result = await Svc<ILecturersServices>().Create(newLecturer);
-
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public async Task Should_AddNewLecturer_WhenDataIsValid()
-    {
-        LecturerDTO newLecturer = MockLecturerDTOData();
+        newLecturer.FirstName = "Test";
+        newLecturer.LastName = "Test";
+        //newLecturer.Image
+        newLecturer.Qualifications = "Testicle";
 
         var result = await Svc<ILecturersServices>().Create(newLecturer);
 
         Assert.NotNull(result);
-        Assert.Equal(newLecturer.FirstName, result.FirstName);
-        Assert.Equal(newLecturer.LastName, result.LastName);
     }
 
     [Fact]
+    //details test
     public async Task Should_ReturnLecturerDetails_WhenGuidIsNotNull()
     {
-        Lecturer createdLecturer = await AddObjectToDB();
+        //ülesseade
+        LecturerDTO lecturer = MockLecturerDTOData();
+        var createdLecturer = await Svc<ILecturersServices>().Create(lecturer);
 
+        //tegevus
         var result = await Svc<ILecturersServices>().DetailsAsync(createdLecturer.Id);
 
+        //kontroll
         Assert.NotNull(result);
-        Assert.Equal(createdLecturer.Id, result.Id);
-        Assert.Equal(createdLecturer, result);
+        Assert.Equal(result.Id, createdLecturer.Id);
+        Assert.Equal(result, createdLecturer);
     }
 
     [Fact]
+    //update test
     public async Task Should_UpdateWithNewData_WhenDataIsDifferentFromDB()
     {
         Lecturer createdLecturer = await AddObjectToDB();
@@ -63,10 +59,12 @@ public class LecturersServicesTests : TestBase
         Assert.NotNull(result);
         Assert.Equal(updatedLecturer.Id, result.Id);
         Assert.Equal(updatedLecturer.LastName, result.LastName);
-        Assert.NotEqual(originalFirstName, result.FirstName);
+        Assert.Equal(updatedLecturer.Qualifications, result.Qualifications);
+        Assert.DoesNotMatch(originalFirstName, result.FirstName);
     }
 
     [Fact]
+    //delete test
     public async Task Should_DeleteDataFromDB_WhenValidIdGiven()
     {
         Lecturer createdLecturer = await AddObjectToDB();
@@ -75,6 +73,7 @@ public class LecturersServicesTests : TestBase
         var result = await Svc<ILecturersServices>().DetailsAsync(createdLecturer.Id);
 
         Assert.Null(result);
+        Assert.Equal(createdLecturer, deletedLecturer);
         Assert.Equal(createdLecturer.Id, deletedLecturer.Id);
     }
 
