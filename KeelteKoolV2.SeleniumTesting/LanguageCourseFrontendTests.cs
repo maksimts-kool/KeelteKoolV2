@@ -53,8 +53,10 @@ namespace KeelteKoolV2.SeleniumTesting
 
             /* kontroll */
             //kogume andmed
-            string languageCourseNameData = driver.FindElement(By.Id("IndexTableCourseNimetus")).Text;
-            string languageCourseKeelData = driver.FindElement(By.Id("IndexTableCourseKeel")).Text;
+            IWebElement? row = FindCourseRow(courseName);
+            Assert.NotNull(row);
+            string languageCourseNameData = row.FindElement(By.Id("IndexTableCourseNimetus")).Text;
+            string languageCourseKeelData = row.FindElement(By.Id("IndexTableCourseKeel")).Text;
             //assertime
             Assert.Equal(courseName, languageCourseNameData);
             Assert.Equal(CourseKeel, languageCourseKeelData);
@@ -67,7 +69,9 @@ namespace KeelteKoolV2.SeleniumTesting
             CreateLanguageCourse(courseName);
 
             /* tegevus */
-            IWebElement indexDetailsButton = driver.FindElement(By.Id("IndexTableCourseDetails_BTN"));
+            IWebElement? row = FindCourseRow(courseName);
+            Assert.NotNull(row);
+            IWebElement indexDetailsButton = row.FindElement(By.Id("IndexTableCourseDetails_BTN"));
             indexDetailsButton.Click();
 
             /* kontroll */
@@ -92,7 +96,9 @@ namespace KeelteKoolV2.SeleniumTesting
             CreateLanguageCourse(oldName);
 
             /* tegevus 1: tühistame muudatuse */
-            IWebElement indexUpdateButton = driver.FindElement(By.Id("IndexTableCourseUpdate_BTN"));
+            IWebElement? row = FindCourseRow(oldName);
+            Assert.NotNull(row);
+            IWebElement indexUpdateButton = row.FindElement(By.Id("IndexTableCourseUpdate_BTN"));
             indexUpdateButton.Click();
             IWebElement updateEntryNimetus = driver.FindElement(By.Id("CU_LanguageCourse_Nimetus"));
             Assert.Equal(oldName, updateEntryNimetus.GetDomProperty("value")); //vorm on eeltäidetud
@@ -102,11 +108,13 @@ namespace KeelteKoolV2.SeleniumTesting
             updateCancelButton.Click();
 
             /* kontroll 1 */
-            string nameAfterCancel = driver.FindElement(By.Id("IndexTableCourseNimetus")).Text;
-            Assert.Equal(oldName, nameAfterCancel);
+            Assert.NotNull(FindCourseRow(oldName));
+            Assert.Null(FindCourseRow(oldName + " salvestamata"));
 
             /* tegevus 2: salvestame muudatuse */
-            indexUpdateButton = driver.FindElement(By.Id("IndexTableCourseUpdate_BTN"));
+            row = FindCourseRow(oldName);
+            Assert.NotNull(row);
+            indexUpdateButton = row.FindElement(By.Id("IndexTableCourseUpdate_BTN"));
             indexUpdateButton.Click();
             updateEntryNimetus = driver.FindElement(By.Id("CU_LanguageCourse_Nimetus"));
             updateEntryNimetus.Clear();
@@ -117,11 +125,14 @@ namespace KeelteKoolV2.SeleniumTesting
 
             /* kontroll 2 */
             //kogume andmed
-            string languageCourseNameData = driver.FindElement(By.Id("IndexTableCourseNimetus")).Text;
-            string languageCourseKeelData = driver.FindElement(By.Id("IndexTableCourseKeel")).Text;
+            row = FindCourseRow(updatedName);
+            Assert.NotNull(row);
+            string languageCourseNameData = row.FindElement(By.Id("IndexTableCourseNimetus")).Text;
+            string languageCourseKeelData = row.FindElement(By.Id("IndexTableCourseKeel")).Text;
             //assertime
             Assert.Equal(updatedName, languageCourseNameData);
             Assert.Equal(CourseKeel, languageCourseKeelData);
+            Assert.Null(FindCourseRow(oldName));
         }
 
         [Fact]
@@ -132,15 +143,16 @@ namespace KeelteKoolV2.SeleniumTesting
             CreateLanguageCourse(name);
 
             /* tegevus */
-            IWebElement indexDeleteButton = driver.FindElement(By.Id("IndexTableCourseDelete_BTN"));
+            IWebElement? row = FindCourseRow(name);
+            Assert.NotNull(row);
+            IWebElement indexDeleteButton = row.FindElement(By.Id("IndexTableCourseDelete_BTN"));
             indexDeleteButton.Click();
             IWebElement deleteConfirmButton = driver.FindElement(By.Id("DetailsDelete_Delete_BTN"));
             deleteConfirmButton.Click();
             courseName = null; //kursus on juba kustutatud, puhastada pole vaja
 
             /* kontroll */
-            List<string> names = GetCourseNames();
-            Assert.DoesNotContain(name, names);
+            Assert.Null(FindCourseRow(name));
         }
 
         public void Dispose()
@@ -182,19 +194,36 @@ namespace KeelteKoolV2.SeleniumTesting
         private void DeleteLanguageCourse(string name)
         {
             driver.Url = BaseUrl + "LanguageCourses";
-            List<string> names = GetCourseNames();
-            if (names.Count == 0 || names[0] != name)
+            IWebElement? row = FindCourseRow(name);
+            if (row == null)
             {
-                return; //kursust pole salvestatud või see pole esimesel real, midagi muud me ei kustuta
+                return; //kursust pole salvestatud, midagi muud me ei kustuta
             }
 
-            IWebElement indexDeleteButton = driver.FindElement(By.Id("IndexTableCourseDelete_BTN"));
+            IWebElement indexDeleteButton = row.FindElement(By.Id("IndexTableCourseDelete_BTN"));
             indexDeleteButton.Click();
             IWebElement deleteConfirmButton = driver.FindElement(By.Id("DetailsDelete_Delete_BTN"));
             deleteConfirmButton.Click();
         }
 
-        private List<string> GetCourseNames() =>
-            driver.FindElements(By.Id("IndexTableCourseNimetus")).Select(td => td.Text.Trim()).ToList();
+        // otsime indeksi tabelist rea, mille nimetus ja keel klapivad, tagastab null kui rida pole
+        private IWebElement? FindCourseRow(string name)
+        {
+            IWebElement tableOfIndex = driver.FindElement(By.Id("IndexTable"));
+            List<IWebElement> rowsOfTable = tableOfIndex.FindElements(By.TagName("tr")).ToList();
+            rowsOfTable.RemoveAt(0); //päiserida
+
+            foreach (var row in rowsOfTable)
+            {
+                var nameElement = row.FindElement(By.Id("IndexTableCourseNimetus")).Text;
+                var keelElement = row.FindElement(By.Id("IndexTableCourseKeel")).Text;
+                if (nameElement == name && keelElement == CourseKeel)
+                {
+                    return row;
+                }
+            }
+
+            return null;
+        }
     }
 }
