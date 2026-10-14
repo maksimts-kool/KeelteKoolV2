@@ -5,7 +5,7 @@
 }
 @* Later check for role of the user, hide this button if not admin or teacher \/ *@
 <div>
-    <a asp-action="create" asp-controller="LanguageCourses" type="submit" class="btn btn-dark">Lisa uus keelekursus</a>
+    <a id="IndexCreateNewLanguageCourse_BTN" asp-action="create" asp-controller="LanguageCourses" type="submit" class="btn btn-dark">Lisa uus keelekursus</a>
 </div>
 
 <div class="h1">
@@ -26,13 +26,13 @@
                 {
                     <tr>
                         <td>@rownumber</td>
-                        <td>@course.Nimetus</td>
-                        <td>@course.Keel</td>
-                        <td>
+                        <td id="IndexTableCourseNimetus">@course.Nimetus</td>
+                        <td id="IndexTableCourseKeel">@course.Keel</td>
+                        <td id="IndexTableCourseActions">
                             <!-- TODO: add details, update and delete functionality from controller -->
-                            <a asp-action="Details" asp-controller="LanguageCourses" asp-route-id="@course.Id" class="btn btn-secondary">Andmed</a>
-                            <a asp-action="Update" asp-controller="LanguageCourses" asp-route-id="@course.Id" class="btn btn-warning">Uuenda</a>
-                            <a asp-action="Delete" asp-controller="LanguageCourses" asp-route-id="@course.Id" class="btn btn-danger">Kustuta</a>
+                            <a id="IndexTableCourseDetails_BTN" asp-action="Details" asp-controller="LanguageCourses" asp-route-id="@course.Id" class="btn btn-secondary">Andmed</a>
+                            <a id="IndexTableCourseUpdate_BTN" asp-action="Update" asp-controller="LanguageCourses" asp-route-id="@course.Id" class="btn btn-warning">Uuenda</a>
+                            <a id="IndexTableCourseDelete_BTN" asp-action="Delete" asp-controller="LanguageCourses" asp-route-id="@course.Id" class="btn btn-danger">Kustuta</a>
                         </td>
                     </tr>
                     rownumber++;
