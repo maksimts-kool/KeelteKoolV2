@@ -9,28 +9,28 @@
     <hr />
     <dl class="row">
         <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Id)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(m => m.Id)</dd>
+        <dd id="DetailsDelete_LanguageCourse_Id" class="col-sm-10">@Html.DisplayFor(m => m.Id)</dd>
         <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Nimetus)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(m => m.Nimetus)</dd>
+        <dd id="DetailsDelete_LanguageCourse_Nimetus" class="col-sm-10">@Html.DisplayFor(m => m.Nimetus)</dd>
         <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Keel)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(m => m.Keel)</dd>
+        <dd id="DetailsDelete_LanguageCourse_Keel" class="col-sm-10">@Html.DisplayFor(m => m.Keel)</dd>
         <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Kirjeldus)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(m => m.Kirjeldus)</dd>
+        <dd id="DetailsDelete_LanguageCourse_Kirjeldus" class="col-sm-10">@Html.DisplayFor(m => m.Kirjeldus)</dd>
         <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Tase)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(m => m.Tase)</dd>
+        <dd id="DetailsDelete_LanguageCourse_Tase" class="col-sm-10">@Html.DisplayFor(m => m.Tase)</dd>
     </dl>
 
     @if (isDelete)
     {
         <form asp-action="Delete" asp-controller="LanguageCourses" method="post">
             <input type="hidden" name="id" value="@Model.Id" />
-            <input type="submit" value="Kustuta" class="btn btn-danger" />
-            <a asp-action="Index" asp-controller="LanguageCourses" class="btn btn-secondary">Tühista</a>
+            <input id="DetailsDelete_Delete_BTN" type="submit" value="Kustuta" class="btn btn-danger" />
+            <a id="DetailsDelete_Cancel_BTN" asp-action="Index" asp-controller="LanguageCourses" class="btn btn-secondary">Tühista</a>
         </form>
     }
     else
     {
-        <a asp-action="Update" asp-controller="LanguageCourses" asp-route-id="@Model.Id" class="btn btn-warning">Muuda</a>
-        <a asp-action="Index" asp-controller="LanguageCourses" class="btn btn-primary">Tagasi</a>
+        <a id="DetailsDelete_Update_BTN" asp-action="Update" asp-controller="LanguageCourses" asp-route-id="@Model.Id" class="btn btn-warning">Muuda</a>
+        <a id="DetailsDelete_Back_BTN" asp-action="Index" asp-controller="LanguageCourses" class="btn btn-primary">Tagasi</a>
     }
 </div>
