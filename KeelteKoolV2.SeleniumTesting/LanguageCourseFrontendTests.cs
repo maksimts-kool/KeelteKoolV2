@@ -49,10 +49,8 @@ namespace KeelteKoolV2.SeleniumTesting
         [Fact, TestPriority(1)]
         public void Should_CreateLanguageCourse_WithCorrectData_ShowInIndex()
         {
-            courseName = $"Automaattestimise kursus {Guid.NewGuid():N}";
-
             /* tegevus */
-            CreateLanguageCourse(courseName);
+            courseName = DataEntry();
 
             /* kontroll */
             //kogume andmed
@@ -63,13 +61,14 @@ namespace KeelteKoolV2.SeleniumTesting
             //assertime
             Assert.Equal(courseName, languageCourseNameData);
             Assert.Equal(CourseKeel, languageCourseKeelData);
+
+            DataClear(courseName);
         }
 
         [Fact, TestPriority(2)]
         public void Should_ReadLanguageCourse_ShowDetails()
         {
-            courseName = $"Automaattestimise kursus {Guid.NewGuid():N}";
-            CreateLanguageCourse(courseName);
+            courseName = DataEntry();
 
             /* tegevus */
             IWebElement? row = FindCourseRow(courseName);
@@ -87,16 +86,17 @@ namespace KeelteKoolV2.SeleniumTesting
             Assert.Equal(courseName, nameData);
             Assert.Equal(CourseKeel, keelData);
             Assert.Equal("3", taseData);
+            Assert.True(int.Parse(taseData) > -1);
             Assert.Equal("Kursusel õpime automaattestimist.", kirjeldusData);
+
+            DataClear(courseName);
         }
 
         [Fact, TestPriority(3)]
         public void Should_UpdateLanguageCourse_CancelKeepsOriginal_SaveChangesName()
         {
-            string oldName = $"Automaattestimise kursus {Guid.NewGuid():N}";
+            string oldName = DataEntry();
             string updatedName = oldName + " uuendatud";
-            courseName = oldName;
-            CreateLanguageCourse(oldName);
 
             /* tegevus 1: tühistame muudatuse */
             IWebElement? row = FindCourseRow(oldName);
@@ -136,14 +136,14 @@ namespace KeelteKoolV2.SeleniumTesting
             Assert.Equal(updatedName, languageCourseNameData);
             Assert.Equal(CourseKeel, languageCourseKeelData);
             Assert.Null(FindCourseRow(oldName));
+
+            DataClear(updatedName);
         }
 
         [Fact, TestPriority(4)]
         public void Should_DeleteLanguageCourse_RemoveFromIndex()
         {
-            string name = $"Automaattestimise kursus {Guid.NewGuid():N}";
-            courseName = name;
-            CreateLanguageCourse(name);
+            string name = DataEntry();
 
             /* tegevus */
             IWebElement? row = FindCourseRow(name);
@@ -171,6 +171,25 @@ namespace KeelteKoolV2.SeleniumTesting
             {
                 driver.Dispose();
                 GC.SuppressFinalize(this);
+            }
+        }
+
+        // sisestab unikaalse nimega testkursuse ja tagastab selle nime, Dispose puhastab kursuse ka siis, kui test kukub
+        private string DataEntry()
+        {
+            string name = $"Automaattestimise kursus {Guid.NewGuid():N}";
+            courseName = name;
+            CreateLanguageCourse(name);
+            return name;
+        }
+
+        // kustutab testkursuse, et järgmine test saaks puhtalt alustada
+        private void DataClear(string name)
+        {
+            DeleteLanguageCourse(name);
+            if (courseName == name)
+            {
+                courseName = null;
             }
         }
 
