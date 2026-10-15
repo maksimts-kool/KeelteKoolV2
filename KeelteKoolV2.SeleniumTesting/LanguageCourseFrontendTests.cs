@@ -2,9 +2,12 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.Events;
 using Xunit;
+using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace KeelteKoolV2.SeleniumTesting
 {
+    [TestCaseOrderer("KeelteKoolV2.SeleniumTesting.PriorityOrderer", "KeelteKoolV2.SeleniumTesting")]
     public class LanguageCourseFrontendTests : IDisposable
     {
         private static readonly string BaseUrl = Environment.GetEnvironmentVariable("SELENIUM_BASE_URL")
@@ -43,7 +46,7 @@ namespace KeelteKoolV2.SeleniumTesting
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
         }
 
-        [Fact]
+        [Fact, TestPriority(1)]
         public void Should_CreateLanguageCourse_WithCorrectData_ShowInIndex()
         {
             courseName = $"Automaattestimise kursus {Guid.NewGuid():N}";
@@ -62,7 +65,7 @@ namespace KeelteKoolV2.SeleniumTesting
             Assert.Equal(CourseKeel, languageCourseKeelData);
         }
 
-        [Fact]
+        [Fact, TestPriority(2)]
         public void Should_ReadLanguageCourse_ShowDetails()
         {
             courseName = $"Automaattestimise kursus {Guid.NewGuid():N}";
@@ -87,7 +90,7 @@ namespace KeelteKoolV2.SeleniumTesting
             Assert.Equal("Kursusel õpime automaattestimist.", kirjeldusData);
         }
 
-        [Fact]
+        [Fact, TestPriority(3)]
         public void Should_UpdateLanguageCourse_CancelKeepsOriginal_SaveChangesName()
         {
             string oldName = $"Automaattestimise kursus {Guid.NewGuid():N}";
@@ -135,7 +138,7 @@ namespace KeelteKoolV2.SeleniumTesting
             Assert.Null(FindCourseRow(oldName));
         }
 
-        [Fact]
+        [Fact, TestPriority(4)]
         public void Should_DeleteLanguageCourse_RemoveFromIndex()
         {
             string name = $"Automaattestimise kursus {Guid.NewGuid():N}";
@@ -224,6 +227,39 @@ namespace KeelteKoolV2.SeleniumTesting
             }
 
             return null;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    public class TestPriorityAttribute : Attribute
+    {
+        public int Priority { get; }
+
+        public TestPriorityAttribute(int priority)
+        {
+            Priority = priority;
+        }
+    }
+
+    // Kasutus: [TestCaseOrderer("KeelteKoolV2.SeleniumTesting.PriorityOrderer", "KeelteKoolV2.SeleniumTesting")] klassil
+    // ja [TestPriority(n)] meetodil. Väiksem number jookseb enne, märgistamata testid jooksevad viimasena.
+    public class PriorityOrderer : ITestCaseOrderer
+    {
+        public IEnumerable<TTestCase> OrderTestCases<TTestCase>(IEnumerable<TTestCase> testCases)
+            where TTestCase : ITestCase
+        {
+            return testCases
+                .OrderBy(GetPriority)
+                .ThenBy(tc => tc.TestMethod.Method.Name);
+        }
+
+        private static int GetPriority<TTestCase>(TTestCase testCase) where TTestCase : ITestCase
+        {
+            IAttributeInfo? attribute = testCase.TestMethod.Method
+                .GetCustomAttributes(typeof(TestPriorityAttribute).AssemblyQualifiedName)
+                .FirstOrDefault();
+
+            return attribute is null ? int.MaxValue : Convert.ToInt32(attribute.GetConstructorArguments().First());
         }
     }
 }
