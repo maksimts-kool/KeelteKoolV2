@@ -2,15 +2,22 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.Events;
 using Xunit;
+using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace KeelteKoolV2.SeleniumTesting
 {
+    [TestCaseOrderer("KeelteKoolV2.SeleniumTesting.PriorityOrderer", "KeelteKoolV2.SeleniumTesting")]
     public class LanguageCourseFrontendTests : IDisposable
     {
         private static readonly string BaseUrl = Environment.GetEnvironmentVariable("SELENIUM_BASE_URL")
             ?? "http://localhost:5117/"; //navigeeritav aadress
         // indeks näitab 20 kursust Keele järgi sorteeritult, numbriga algav keel hoiab testkursused nähtaval
         private const string CourseKeel = "0 Selenium";
+        // teine andmekomplekt, millega uuendustest kõik väljad üle kirjutab
+        private const string UpdatedCourseKeel = "0 Mantis, Excel";
+        private const string UpdatedCourseTase = "4";
+        private const string UpdatedCourseKirjeldus = "Kursusel õpime manuaaltestimist.";
 
         private readonly IWebDriver driver;
         private string? courseName;
@@ -43,13 +50,11 @@ namespace KeelteKoolV2.SeleniumTesting
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
         }
 
-        [Fact]
+        [Fact, TestPriority(1)]
         public void Should_CreateLanguageCourse_WithCorrectData_ShowInIndex()
         {
-            courseName = $"Automaattestimise kursus {Guid.NewGuid():N}";
-
             /* tegevus */
-            CreateLanguageCourse(courseName);
+            courseName = DataEntry();
 
             /* kontroll */
             //kogume andmed
@@ -60,13 +65,14 @@ namespace KeelteKoolV2.SeleniumTesting
             //assertime
             Assert.Equal(courseName, languageCourseNameData);
             Assert.Equal(CourseKeel, languageCourseKeelData);
+
+            DataClear(courseName);
         }
 
-        [Fact]
+        [Fact, TestPriority(2)]
         public void Should_ReadLanguageCourse_ShowDetails()
         {
-            courseName = $"Automaattestimise kursus {Guid.NewGuid():N}";
-            CreateLanguageCourse(courseName);
+            courseName = DataEntry();
 
             /* tegevus */
             IWebElement? row = FindCourseRow(courseName);
@@ -76,24 +82,35 @@ namespace KeelteKoolV2.SeleniumTesting
 
             /* kontroll */
             //kogume andmed
+            string idData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Id")).Text;
             string nameData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Nimetus")).Text;
             string keelData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Keel")).Text;
             string taseData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Tase")).Text;
             string kirjeldusData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Kirjeldus")).Text;
             //assertime
+            Assert.NotEmpty(idData);
+            Assert.True(Guid.TryParse(idData, out _));
             Assert.Equal(courseName, nameData);
             Assert.Equal(CourseKeel, keelData);
             Assert.Equal("3", taseData);
+            Assert.True(int.Parse(taseData) > -1);
             Assert.Equal("Kursusel õpime automaattestimist.", kirjeldusData);
+
+            /* tegevus 2: tagasi indeksisse */
+            IWebElement detailsBackButton = driver.FindElement(By.Id("DetailsDelete_Back_BTN"));
+            detailsBackButton.Click();
+
+            /* kontroll 2 */
+            Assert.NotNull(FindCourseRow(courseName));
+
+            DataClear(courseName);
         }
 
-        [Fact]
+        [Fact, TestPriority(3)]
         public void Should_UpdateLanguageCourse_CancelKeepsOriginal_SaveChangesName()
         {
-            string oldName = $"Automaattestimise kursus {Guid.NewGuid():N}";
+            string oldName = DataEntry();
             string updatedName = oldName + " uuendatud";
-            courseName = oldName;
-            CreateLanguageCourse(oldName);
 
             /* tegevus 1: tühistame muudatuse */
             IWebElement? row = FindCourseRow(oldName);
@@ -120,6 +137,16 @@ namespace KeelteKoolV2.SeleniumTesting
             updateEntryNimetus.Clear();
             updateEntryNimetus.SendKeys(updatedName);
             courseName = updatedName;
+            //kirjutame üle ka ülejäänud väljad teise andmekomplektiga
+            IWebElement updateEntryKeel = driver.FindElement(By.Id("CU_LanguageCourse_Keel"));
+            updateEntryKeel.Clear();
+            updateEntryKeel.SendKeys(UpdatedCourseKeel);
+            IWebElement updateEntryTase = driver.FindElement(By.Id("CU_LanguageCourse_Tase"));
+            updateEntryTase.Clear();
+            updateEntryTase.SendKeys(UpdatedCourseTase);
+            IWebElement updateEntryKirjeldus = driver.FindElement(By.Id("CU_LanguageCourse_Kirjeldus"));
+            updateEntryKirjeldus.Clear();
+            updateEntryKirjeldus.SendKeys(UpdatedCourseKirjeldus);
             IWebElement updateSaveButton = driver.FindElement(By.Id("CU_LanguageCourse_Save_BTN"));
             updateSaveButton.Click();
 
@@ -131,16 +158,33 @@ namespace KeelteKoolV2.SeleniumTesting
             string languageCourseKeelData = row.FindElement(By.Id("IndexTableCourseKeel")).Text;
             //assertime
             Assert.Equal(updatedName, languageCourseNameData);
-            Assert.Equal(CourseKeel, languageCourseKeelData);
+            Assert.Equal(UpdatedCourseKeel, languageCourseKeelData);
             Assert.Null(FindCourseRow(oldName));
+
+            /* kontroll 3: uuendatud andmed on ka detailvaates */
+            IWebElement indexDetailsButton = row.FindElement(By.Id("IndexTableCourseDetails_BTN"));
+            indexDetailsButton.Click();
+            string idData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Id")).Text;
+            string nameData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Nimetus")).Text;
+            string keelData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Keel")).Text;
+            string taseData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Tase")).Text;
+            string kirjeldusData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Kirjeldus")).Text;
+            Assert.NotEmpty(idData);
+            Assert.Equal(updatedName, nameData);
+            Assert.Equal(UpdatedCourseKeel, keelData);
+            Assert.Equal(UpdatedCourseTase, taseData);
+            Assert.Equal(UpdatedCourseKirjeldus, kirjeldusData);
+            Assert.NotEqual(CourseKeel, keelData);
+            Assert.NotEqual("3", taseData);
+            Assert.NotEqual("Kursusel õpime automaattestimist.", kirjeldusData);
+
+            DataClear(updatedName);
         }
 
-        [Fact]
+        [Fact, TestPriority(4)]
         public void Should_DeleteLanguageCourse_RemoveFromIndex()
         {
-            string name = $"Automaattestimise kursus {Guid.NewGuid():N}";
-            courseName = name;
-            CreateLanguageCourse(name);
+            string name = DataEntry();
 
             /* tegevus */
             IWebElement? row = FindCourseRow(name);
@@ -168,6 +212,25 @@ namespace KeelteKoolV2.SeleniumTesting
             {
                 driver.Dispose();
                 GC.SuppressFinalize(this);
+            }
+        }
+
+        // sisestab unikaalse nimega testkursuse ja tagastab selle nime, Dispose puhastab kursuse ka siis, kui test kukub
+        private string DataEntry()
+        {
+            string name = $"Automaattestimise kursus {Guid.NewGuid():N}";
+            courseName = name;
+            CreateLanguageCourse(name);
+            return name;
+        }
+
+        // kustutab testkursuse, et järgmine test saaks puhtalt alustada
+        private void DataClear(string name)
+        {
+            DeleteLanguageCourse(name);
+            if (courseName == name)
+            {
+                courseName = null;
             }
         }
 
@@ -206,7 +269,7 @@ namespace KeelteKoolV2.SeleniumTesting
             deleteConfirmButton.Click();
         }
 
-        // otsime indeksi tabelist rea, mille nimetus ja keel klapivad, tagastab null kui rida pole
+        // otsime indeksi tabelist rea, mille nimetus ja (testi)keel klapivad, tagastab null kui rida pole
         private IWebElement? FindCourseRow(string name)
         {
             IWebElement tableOfIndex = driver.FindElement(By.Id("IndexTable"));
@@ -217,13 +280,46 @@ namespace KeelteKoolV2.SeleniumTesting
             {
                 var nameElement = row.FindElement(By.Id("IndexTableCourseNimetus")).Text;
                 var keelElement = row.FindElement(By.Id("IndexTableCourseKeel")).Text;
-                if (nameElement == name && keelElement == CourseKeel)
+                if (nameElement == name && keelElement is CourseKeel or UpdatedCourseKeel)
                 {
                     return row;
                 }
             }
 
             return null;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    public class TestPriorityAttribute : Attribute
+    {
+        public int Priority { get; }
+
+        public TestPriorityAttribute(int priority)
+        {
+            Priority = priority;
+        }
+    }
+
+    // Kasutus: [TestCaseOrderer("KeelteKoolV2.SeleniumTesting.PriorityOrderer", "KeelteKoolV2.SeleniumTesting")] klassil
+    // ja [TestPriority(n)] meetodil. Väiksem number jookseb enne, märgistamata testid jooksevad viimasena.
+    public class PriorityOrderer : ITestCaseOrderer
+    {
+        public IEnumerable<TTestCase> OrderTestCases<TTestCase>(IEnumerable<TTestCase> testCases)
+            where TTestCase : ITestCase
+        {
+            return testCases
+                .OrderBy(GetPriority)
+                .ThenBy(tc => tc.TestMethod.Method.Name);
+        }
+
+        private static int GetPriority<TTestCase>(TTestCase testCase) where TTestCase : ITestCase
+        {
+            IAttributeInfo? attribute = testCase.TestMethod.Method
+                .GetCustomAttributes(typeof(TestPriorityAttribute).AssemblyQualifiedName)
+                .FirstOrDefault();
+
+            return attribute is null ? int.MaxValue : Convert.ToInt32(attribute.GetConstructorArguments().First());
         }
     }
 }
