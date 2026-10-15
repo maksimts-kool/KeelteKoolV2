@@ -44,7 +44,7 @@ namespace KeelteKoolV2.SeleniumTesting
         }
 
         [Fact]
-        public void Should_CreateLanguageCourse_WithCorrectData_ShowInIndex()
+        public void Should_CreateLanguageCourse_WhenCorrectDataIsSavedAndRowIsInIndex()
         {
             courseName = $"Automaattestimise kursus {Guid.NewGuid():N}";
 
@@ -63,7 +63,7 @@ namespace KeelteKoolV2.SeleniumTesting
         }
 
         [Fact]
-        public void Should_ReadLanguageCourse_ShowDetails()
+        public void Should_ShowLanguageCourseDetails_WhenDetailsButtonIsClicked()
         {
             courseName = $"Automaattestimise kursus {Guid.NewGuid():N}";
             CreateLanguageCourse(courseName);
@@ -88,7 +88,7 @@ namespace KeelteKoolV2.SeleniumTesting
         }
 
         [Fact]
-        public void Should_UpdateLanguageCourse_CancelKeepsOriginal_SaveChangesName()
+        public void Should_UpdateLanguageCourseName_WhenChangeIsSavedButNotWhenCancelled()
         {
             string oldName = $"Automaattestimise kursus {Guid.NewGuid():N}";
             string updatedName = oldName + " uuendatud";
@@ -136,7 +136,7 @@ namespace KeelteKoolV2.SeleniumTesting
         }
 
         [Fact]
-        public void Should_DeleteLanguageCourse_RemoveFromIndex()
+        public void Should_DeleteLanguageCourse_WhenDeleteIsConfirmedAndRowIsGoneFromIndex()
         {
             string name = $"Automaattestimise kursus {Guid.NewGuid():N}";
             courseName = name;
