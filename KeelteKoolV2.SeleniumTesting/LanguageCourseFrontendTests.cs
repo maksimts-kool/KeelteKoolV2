@@ -14,6 +14,10 @@ namespace KeelteKoolV2.SeleniumTesting
             ?? "http://localhost:5117/"; //navigeeritav aadress
         // indeks näitab 20 kursust Keele järgi sorteeritult, numbriga algav keel hoiab testkursused nähtaval
         private const string CourseKeel = "0 Selenium";
+        // teine andmekomplekt, millega uuendustest kõik väljad üle kirjutab
+        private const string UpdatedCourseKeel = "0 Mantis, Excel";
+        private const string UpdatedCourseTase = "4";
+        private const string UpdatedCourseKirjeldus = "Kursusel õpime manuaaltestimist.";
 
         private readonly IWebDriver driver;
         private string? courseName;
@@ -78,16 +82,26 @@ namespace KeelteKoolV2.SeleniumTesting
 
             /* kontroll */
             //kogume andmed
+            string idData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Id")).Text;
             string nameData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Nimetus")).Text;
             string keelData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Keel")).Text;
             string taseData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Tase")).Text;
             string kirjeldusData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Kirjeldus")).Text;
             //assertime
+            Assert.NotEmpty(idData);
+            Assert.True(Guid.TryParse(idData, out _));
             Assert.Equal(courseName, nameData);
             Assert.Equal(CourseKeel, keelData);
             Assert.Equal("3", taseData);
             Assert.True(int.Parse(taseData) > -1);
             Assert.Equal("Kursusel õpime automaattestimist.", kirjeldusData);
+
+            /* tegevus 2: tagasi indeksisse */
+            IWebElement detailsBackButton = driver.FindElement(By.Id("DetailsDelete_Back_BTN"));
+            detailsBackButton.Click();
+
+            /* kontroll 2 */
+            Assert.NotNull(FindCourseRow(courseName));
 
             DataClear(courseName);
         }
@@ -123,6 +137,16 @@ namespace KeelteKoolV2.SeleniumTesting
             updateEntryNimetus.Clear();
             updateEntryNimetus.SendKeys(updatedName);
             courseName = updatedName;
+            //kirjutame üle ka ülejäänud väljad teise andmekomplektiga
+            IWebElement updateEntryKeel = driver.FindElement(By.Id("CU_LanguageCourse_Keel"));
+            updateEntryKeel.Clear();
+            updateEntryKeel.SendKeys(UpdatedCourseKeel);
+            IWebElement updateEntryTase = driver.FindElement(By.Id("CU_LanguageCourse_Tase"));
+            updateEntryTase.Clear();
+            updateEntryTase.SendKeys(UpdatedCourseTase);
+            IWebElement updateEntryKirjeldus = driver.FindElement(By.Id("CU_LanguageCourse_Kirjeldus"));
+            updateEntryKirjeldus.Clear();
+            updateEntryKirjeldus.SendKeys(UpdatedCourseKirjeldus);
             IWebElement updateSaveButton = driver.FindElement(By.Id("CU_LanguageCourse_Save_BTN"));
             updateSaveButton.Click();
 
@@ -134,8 +158,25 @@ namespace KeelteKoolV2.SeleniumTesting
             string languageCourseKeelData = row.FindElement(By.Id("IndexTableCourseKeel")).Text;
             //assertime
             Assert.Equal(updatedName, languageCourseNameData);
-            Assert.Equal(CourseKeel, languageCourseKeelData);
+            Assert.Equal(UpdatedCourseKeel, languageCourseKeelData);
             Assert.Null(FindCourseRow(oldName));
+
+            /* kontroll 3: uuendatud andmed on ka detailvaates */
+            IWebElement indexDetailsButton = row.FindElement(By.Id("IndexTableCourseDetails_BTN"));
+            indexDetailsButton.Click();
+            string idData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Id")).Text;
+            string nameData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Nimetus")).Text;
+            string keelData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Keel")).Text;
+            string taseData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Tase")).Text;
+            string kirjeldusData = driver.FindElement(By.Id("DetailsDelete_LanguageCourse_Kirjeldus")).Text;
+            Assert.NotEmpty(idData);
+            Assert.Equal(updatedName, nameData);
+            Assert.Equal(UpdatedCourseKeel, keelData);
+            Assert.Equal(UpdatedCourseTase, taseData);
+            Assert.Equal(UpdatedCourseKirjeldus, kirjeldusData);
+            Assert.NotEqual(CourseKeel, keelData);
+            Assert.NotEqual("3", taseData);
+            Assert.NotEqual("Kursusel õpime automaattestimist.", kirjeldusData);
 
             DataClear(updatedName);
         }
@@ -228,7 +269,7 @@ namespace KeelteKoolV2.SeleniumTesting
             deleteConfirmButton.Click();
         }
 
-        // otsime indeksi tabelist rea, mille nimetus ja keel klapivad, tagastab null kui rida pole
+        // otsime indeksi tabelist rea, mille nimetus ja (testi)keel klapivad, tagastab null kui rida pole
         private IWebElement? FindCourseRow(string name)
         {
             IWebElement tableOfIndex = driver.FindElement(By.Id("IndexTable"));
@@ -239,7 +280,7 @@ namespace KeelteKoolV2.SeleniumTesting
             {
                 var nameElement = row.FindElement(By.Id("IndexTableCourseNimetus")).Text;
                 var keelElement = row.FindElement(By.Id("IndexTableCourseKeel")).Text;
-                if (nameElement == name && keelElement == CourseKeel)
+                if (nameElement == name && keelElement is CourseKeel or UpdatedCourseKeel)
                 {
                     return row;
                 }
