@@ -9,13 +9,44 @@ namespace KeelteKoolV2.xUnitTesting;
 public class LecturersServicesTests : TestBase
 {
     [Fact]
-    public async Task ShouldNot_AddNewLecturer_WhenResultIsReturned()
+    //create test
+    public async Task Should_AddNewLecturer_WhenResultIsReturned()
     {
+        //ülesseade
         LecturerDTO newLecturer = MockLecturerDTOData();
 
+        //tegevus
         var result = await Svc<ILecturersServices>().Create(newLecturer);
 
+        //kontroll
         Assert.NotNull(result);
+        //teenus genereerib uuele õppejõule id
+        Assert.NotEqual(Guid.Empty, result.Id);
+        //teenus ei kaota ära andmeid mis me sisestasime
+        Assert.Equal(newLecturer.FirstName, result.FirstName);
+        Assert.Equal(newLecturer.LastName, result.LastName);
+        Assert.Equal(newLecturer.Qualifications, result.Qualifications);
+        //loomise ja muutmise aeg on määratud
+        Assert.NotEqual(default, result.CreatedAt);
+        Assert.NotEqual(default, result.ModifiedAt);
+        //õppejõud on andmebaasi salvestatud
+        Assert.NotNull(await Svc<ILecturersServices>().DetailsAsync(result.Id));
+    }
+
+    [Fact]
+    public async Task ShouldNot_AddNewLecturer_WhenFieldsEmpty()
+    {
+        //ülesseade
+        LecturerDTO newLecturer = MockLecturerDTOData();
+        newLecturer.FirstName = string.Empty;
+        newLecturer.LastName = string.Empty;
+
+        //tegevus
+        var result = await Svc<ILecturersServices>().Create(newLecturer);
+
+        //kontroll
+        //teenus lükkab ilma nimeta õppejõu lisamise tagasi
+        Assert.Null(result);
     }
 
     [Fact]
