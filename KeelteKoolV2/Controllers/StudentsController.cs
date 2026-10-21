@@ -51,7 +51,7 @@ namespace KeelteKoolV2.Controllers
                 FirstName = vm.FirstName,
                 LastName = vm.LastName,
                 Email = vm.Email,
-                DateOfBirth = vm.DateOfBirth,
+                DateOfBirth = vm.DateOfBirth.Value,
                 UserID = vm.UserID
             };
             var result = await _studentsServices.Create(dto);
@@ -101,7 +101,7 @@ namespace KeelteKoolV2.Controllers
                 FirstName = vm.FirstName,
                 LastName = vm.LastName,
                 Email = vm.Email,
-                DateOfBirth = vm.DateOfBirth,
+                DateOfBirth = vm.DateOfBirth.Value,
                 UserID = vm.UserID,
                 CreatedAt = vm.CreatedAt
             };
