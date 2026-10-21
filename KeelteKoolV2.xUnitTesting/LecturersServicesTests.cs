@@ -37,16 +37,30 @@ public class LecturersServicesTests : TestBase
     public async Task ShouldNot_AddNewLecturer_WhenFieldsEmpty()
     {
         //ülesseade
+        int lecturersBefore = Svc<KeelteKoolV2Context>().Lecturers.Count();
         LecturerDTO newLecturer = MockLecturerDTOData();
         newLecturer.FirstName = string.Empty;
         newLecturer.LastName = string.Empty;
+        LecturerDTO noFirstName = MockLecturerDTOData();
+        noFirstName.FirstName = string.Empty;
+        LecturerDTO noLastName = MockLecturerDTOData();
+        noLastName.LastName = string.Empty;
 
         //tegevus
         var result = await Svc<ILecturersServices>().Create(newLecturer);
+        var noFirstNameResult = await Svc<ILecturersServices>().Create(noFirstName);
+        var noLastNameResult = await Svc<ILecturersServices>().Create(noLastName);
 
         //kontroll
         //teenus lükkab ilma nimeta õppejõu lisamise tagasi
         Assert.Null(result);
+        //ka ühest puuduvast nimest piisab, et lisamine tagasi lükata
+        Assert.Null(noFirstNameResult);
+        Assert.Null(noLastNameResult);
+        //andmebaasi ei lisatud ühtegi uut õppejõudu
+        Assert.Equal(lecturersBefore, Svc<KeelteKoolV2Context>().Lecturers.Count());
+        Assert.DoesNotContain(Svc<KeelteKoolV2Context>().Lecturers,
+            x => x.FirstName == string.Empty || x.LastName == string.Empty);
     }
 
     [Fact]
@@ -64,6 +78,10 @@ public class LecturersServicesTests : TestBase
         Assert.NotNull(result);
         Assert.Equal(result.Id, createdLecturer.Id);
         Assert.Equal(result, createdLecturer);
+        //tagastatud õppejõul on samad andmed, mis me sisestasime
+        Assert.Equal(lecturer.FirstName, result.FirstName);
+        Assert.Equal(lecturer.LastName, result.LastName);
+        Assert.Equal(lecturer.Qualifications, result.Qualifications);
     }
 
     [Fact]
@@ -95,13 +113,19 @@ public class LecturersServicesTests : TestBase
     public async Task Should_DeleteDataFromDB_WhenValidIdGiven()
     {
         Lecturer createdLecturer = await AddObjectToDB();
+        Lecturer otherLecturer = await AddObjectToDB();
 
         var deletedLecturer = await Svc<ILecturersServices>().Delete(createdLecturer.Id);
         var result = await Svc<ILecturersServices>().DetailsAsync(createdLecturer.Id);
 
+        //kustutatud õppejõudu andmebaasist enam ei leita
         Assert.Null(result);
         Assert.Equal(createdLecturer, deletedLecturer);
         Assert.Equal(createdLecturer.Id, deletedLecturer.Id);
+        //teine õppejõud jäi andmebaasi alles
+        Assert.NotNull(await Svc<ILecturersServices>().DetailsAsync(otherLecturer.Id));
+        //juba kustutatud õppejõudu ei saa uuesti kustutada
+        Assert.Null(await Svc<ILecturersServices>().Delete(createdLecturer.Id));
     }
 
     private async Task<Lecturer> AddObjectToDB()
