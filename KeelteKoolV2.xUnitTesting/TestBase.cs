@@ -30,6 +30,7 @@ namespace KeelteKoolV2.xUnitTesting
         {
             services.AddScoped<ILanguageCoursesServices, LanguageCoursesServices>();
             services.AddScoped<ILecturersServices, LecturersServices>();
+            services.AddScoped<IStudentsServices, StudentsServices>();
             services.AddScoped<IFileServices, FileServices>();
             services.AddScoped<IHostEnvironment, MockIHostEnvironment>();
 
