@@ -146,9 +146,8 @@ namespace KeelteKoolV2.Controllers
             else
             {
                 ViewBag.IsSuccess = false;
-                return View(); 
+                return View();
             }
-            return RedirectToAction("Index", "Home");
         }
 
         /// <summary>
