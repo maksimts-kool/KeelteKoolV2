@@ -17,7 +17,7 @@
         <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Email)</dt>
         <dd class="col-sm-10">@Html.DisplayFor(m => m.Email)</dd>
         <dt class="col-sm-2">@Html.DisplayNameFor(m => m.DateOfBirth)</dt>
-        <dd class="col-sm-10">@Model.DateOfBirth.ToString("dd.MM.yyyy")</dd>
+        <dd class="col-sm-10">@Model.DateOfBirth?.ToString("dd.MM.yyyy")</dd>
     </dl>
 
     @if (isDelete)
