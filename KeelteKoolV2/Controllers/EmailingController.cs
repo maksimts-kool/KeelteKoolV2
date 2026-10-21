@@ -21,7 +21,7 @@ namespace KeelteKoolV2.Controllers
         {
             var isFiles = Request.Form.Files.Any();
             List<IFormFile> files = null;
-            if (isFiles != null)
+            if (isFiles)
             {
                 files = Request.Form.Files.ToList();
             }

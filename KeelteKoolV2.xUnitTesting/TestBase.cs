@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Security.Authentication.ExtendedProtection;
 using System.Text;
-using System.Web.Mvc;
 
 namespace KeelteKoolV2.xUnitTesting
 {
@@ -30,6 +29,7 @@ namespace KeelteKoolV2.xUnitTesting
         {
             services.AddScoped<ILanguageCoursesServices, LanguageCoursesServices>();
             services.AddScoped<ILecturersServices, LecturersServices>();
+            services.AddScoped<IStudentsServices, StudentsServices>();
             services.AddScoped<IFileServices, FileServices>();
             services.AddScoped<IHostEnvironment, MockIHostEnvironment>();
 

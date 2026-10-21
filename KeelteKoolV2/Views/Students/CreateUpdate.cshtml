@@ -1,0 +1,53 @@
+@model KeelteKoolV2.Models.Students.StudentViewModel
+
+@* sama vorm on nii loomiseks kui uuendamiseks, Id olemasolu järgi valitakse tegevus *@
+@{
+    bool isUpdate = Model.Id != null;
+}
+
+<h1>@(isUpdate ? "Uuenda õpilast" : "Loo õpilane")</h1>
+
+<div>
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <input asp-for="Id" type="hidden"/>
+        <input asp-for="CreatedAt" type="hidden"/>
+        <input asp-for="UserID" type="hidden"/>
+
+        <div class="form-group">
+            <label asp-for="FirstName" class="control-label"></label>
+            <input asp-for="FirstName" class="form-control"/>
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="LastName" class="control-label"></label>
+            <input asp-for="LastName" class="form-control" />
+            <span asp-validation-for="LastName" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Email" class="control-label"></label>
+            <input asp-for="Email" type="email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="DateOfBirth" class="control-label"></label>
+            <input asp-for="DateOfBirth" type="date" class="form-control" required />
+            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+        </div>
+
+        @if (isUpdate)
+        {
+            <input asp-action="Update" asp-controller="Students" type="submit" value="Salvesta" class="btn btn-success"/>
+            <a asp-action="Index" asp-controller="Students" class="btn btn-secondary">Tühista</a>
+        }
+        else
+        {
+            <input asp-action="Create" asp-controller="Students" type="submit" value="Loo õpilane" class="btn btn-success"/>
+        }
+
+    </form>
+</div>
