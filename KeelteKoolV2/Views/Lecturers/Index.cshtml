@@ -4,13 +4,13 @@
     ViewBag.Title = "Õppejõud";
 }
 <div>
-    <a asp-action="Create" asp-controller="Lecturers" class="btn btn-dark">Lisa uus õppejõud</a>
+    <a id="IndexCreateNewLecturer_BTN" asp-action="Create" asp-controller="Lecturers" class="btn btn-dark">Lisa uus õppejõud</a>
 </div>
 
-<div class="h1">
+<div id="IndexHeading" class="h1">
     Õppejõud
 </div>
-<table class="table table-hover">
+<table id="IndexTable" class="table table-hover">
     <thead>
         <tr>
             <th scope="col">Nr</th>
@@ -24,12 +24,12 @@
         {
             <tr>
                 <td>@rownumber</td>
-                <td>@lecturer.FirstName</td>
-                <td>@lecturer.LastName</td>
+                <td id="IndexTableLecturerFirstName">@lecturer.FirstName</td>
+                <td id="IndexTableLecturerLastName">@lecturer.LastName</td>
                 <td>
                     <a asp-action="Details" asp-controller="Lecturers" asp-route-id="@lecturer.Id" class="btn btn-secondary">Andmed</a>
                     <a asp-action="Update" asp-controller="Lecturers" asp-route-id="@lecturer.Id" class="btn btn-warning">Uuenda</a>
-                    <a asp-action="Delete" asp-controller="Lecturers" asp-route-id="@lecturer.Id" class="btn btn-danger">Kustuta</a>
+                    <a id="IndexTableLecturerDelete_BTN" asp-action="Delete" asp-controller="Lecturers" asp-route-id="@lecturer.Id" class="btn btn-danger">Kustuta</a>
                 </td>
             </tr>
             rownumber++;

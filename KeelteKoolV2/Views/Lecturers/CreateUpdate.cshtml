@@ -16,20 +16,20 @@
         <input asp-for="UserID" type="hidden"/>
 
         <div class="form-group">
-            <label asp-for="FirstName" class="control-label"></label>
-            <input asp-for="FirstName" class="form-control"/>
+            <label asp-for="FirstName" for="CU_Lecturer_FirstName" class="control-label"></label>
+            <input asp-for="FirstName" id="CU_Lecturer_FirstName" class="form-control"/>
             <span asp-validation-for="FirstName" class="text-danger"></span>
         </div>
 
         <div class="form-group">
-            <label asp-for="LastName" class="control-label"></label>
-            <input asp-for="LastName" class="form-control" />
+            <label asp-for="LastName" for="CU_Lecturer_LastName" class="control-label"></label>
+            <input asp-for="LastName" id="CU_Lecturer_LastName" class="form-control" />
             <span asp-validation-for="LastName" class="text-danger"></span>
         </div>
 
         <div class="form-group">
-            <label asp-for="Qualifications" class="control-label"></label>
-            <input asp-for="Qualifications" class="form-control" />
+            <label asp-for="Qualifications" for="CU_Lecturer_Qualifications" class="control-label"></label>
+            <input asp-for="Qualifications" id="CU_Lecturer_Qualifications" class="form-control" />
             <span asp-validation-for="Qualifications" class="text-danger"></span>
         </div>
 
@@ -53,7 +53,7 @@
         }
         else
         {
-            <input asp-action="Create" asp-controller="Lecturers" type="submit" value="Loo õppejõud" class="btn btn-success"/>
+            <input id="CU_Lecturer_Create_BTN" asp-action="Create" asp-controller="Lecturers" type="submit" value="Loo õppejõud" class="btn btn-success"/>
         }
 
     </form>
