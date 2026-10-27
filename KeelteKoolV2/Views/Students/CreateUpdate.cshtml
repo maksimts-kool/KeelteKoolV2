@@ -16,26 +16,26 @@
         <input asp-for="UserID" type="hidden"/>
 
         <div class="form-group">
-            <label asp-for="FirstName" class="control-label"></label>
-            <input asp-for="FirstName" class="form-control"/>
+            <label asp-for="FirstName" for="CU_Student_FirstName" class="control-label"></label>
+            <input asp-for="FirstName" id="CU_Student_FirstName" class="form-control"/>
             <span asp-validation-for="FirstName" class="text-danger"></span>
         </div>
 
         <div class="form-group">
-            <label asp-for="LastName" class="control-label"></label>
-            <input asp-for="LastName" class="form-control" />
+            <label asp-for="LastName" for="CU_Student_LastName" class="control-label"></label>
+            <input asp-for="LastName" id="CU_Student_LastName" class="form-control" />
             <span asp-validation-for="LastName" class="text-danger"></span>
         </div>
 
         <div class="form-group">
-            <label asp-for="Email" class="control-label"></label>
-            <input asp-for="Email" type="email" class="form-control" />
+            <label asp-for="Email" for="CU_Student_Email" class="control-label"></label>
+            <input asp-for="Email" id="CU_Student_Email" type="email" class="form-control" />
             <span asp-validation-for="Email" class="text-danger"></span>
         </div>
 
         <div class="form-group">
-            <label asp-for="DateOfBirth" class="control-label"></label>
-            <input asp-for="DateOfBirth" type="date" class="form-control" required />
+            <label asp-for="DateOfBirth" for="CU_Student_DateOfBirth" class="control-label"></label>
+            <input asp-for="DateOfBirth" id="CU_Student_DateOfBirth" type="date" class="form-control" required />
             <span asp-validation-for="DateOfBirth" class="text-danger"></span>
         </div>
 
@@ -46,7 +46,7 @@
         }
         else
         {
-            <input asp-action="Create" asp-controller="Students" type="submit" value="Loo õpilane" class="btn btn-success"/>
+            <input id="CU_Student_Create_BTN" asp-action="Create" asp-controller="Students" type="submit" value="Loo õpilane" class="btn btn-success"/>
         }
 
     </form>
