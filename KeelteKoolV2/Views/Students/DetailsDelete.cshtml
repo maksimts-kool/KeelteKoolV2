@@ -24,7 +24,7 @@
     {
         <form asp-action="Delete" asp-controller="Students" method="post">
             <input type="hidden" name="id" value="@Model.Id" />
-            <input type="submit" value="Kustuta" class="btn btn-danger" />
+            <input id="DetailsDelete_Delete_BTN" type="submit" value="Kustuta" class="btn btn-danger" />
             <a asp-action="Index" asp-controller="Students" class="btn btn-secondary">Tühista</a>
         </form>
     }
