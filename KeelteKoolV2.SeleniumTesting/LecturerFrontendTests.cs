@@ -38,6 +38,48 @@ namespace KeelteKoolV2.SeleniumTesting
             DataClear(lecturerFirstName);
         }
 
+        [Fact, TestPriority(2)]
+        public void Should_ReadLecturer_ShowDetails()
+        {
+            // Loob samamoodi nagu loomistestis uue õppejõu ja avab indeksist selle õppejõu andmete lehe.
+            // Kontrollib lehe pealkirju ja aadressi ning et iga välja väärtus (Id, eesnimi, perekonnanimi,
+            // kvalifikatsioon) on täpselt see, mis loomisel sisestati. Lõpuks kontrollib, et "Tagasi" viib indeksisse.
+            lecturerFirstName = DataEntry();
+
+            /* tegevus */
+            IWebElement? row = FindLecturerRow(lecturerFirstName);
+            Assert.NotNull(row);
+            IWebElement indexDetailsButton = row.FindElement(By.Id("IndexTableLecturerDetails_BTN"));
+            indexDetailsButton.Click();
+
+            /* kontroll */
+            //kogume andmed
+            string headingData = driver.FindElement(By.Id("DetailsDelete_Heading")).Text;
+            string subHeadingData = driver.FindElement(By.Id("DetailsDelete_SubHeading")).Text;
+            string idData = driver.FindElement(By.Id("DetailsDelete_Lecturer_Id")).Text;
+            string firstNameData = driver.FindElement(By.Id("DetailsDelete_Lecturer_FirstName")).Text;
+            string lastNameData = driver.FindElement(By.Id("DetailsDelete_Lecturer_LastName")).Text;
+            string qualificationsData = driver.FindElement(By.Id("DetailsDelete_Lecturer_Qualifications")).Text;
+            //assertime
+            Assert.Equal("Andmed", headingData);
+            Assert.Equal("Õppejõud", subHeadingData);
+            Assert.True(Guid.TryParse(idData, out _));
+            Assert.Equal(BaseUrl + "Lecturers/Details/" + idData, driver.Url); //leht on just selle õppejõu oma
+            Assert.Equal(lecturerFirstName, firstNameData);
+            Assert.Equal(LecturerLastName, lastNameData);
+            Assert.Equal(LecturerQualifications, qualificationsData);
+
+            /* tegevus 2: tagasi indeksisse */
+            IWebElement detailsBackButton = driver.FindElement(By.Id("DetailsDelete_Back_BTN"));
+            detailsBackButton.Click();
+
+            /* kontroll 2 */
+            Assert.Equal(BaseUrl + "Lecturers", driver.Url);
+            Assert.NotNull(FindLecturerRow(lecturerFirstName));
+
+            DataClear(lecturerFirstName);
+        }
+
         protected override void CleanUp()
         {
             if (lecturerFirstName != null)
