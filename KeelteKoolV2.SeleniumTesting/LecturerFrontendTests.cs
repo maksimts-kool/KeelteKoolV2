@@ -152,6 +152,58 @@ namespace KeelteKoolV2.SeleniumTesting
             DataClear(updatedFirstName);
         }
 
+        [Fact, TestPriority(4)]
+        public void Should_DeleteLecturer_RemoveFromIndex_DetailsNotFound()
+        {
+            // Loob uue õppejõu, avab indeksist sama õppejõu kustutamise lehe ja kontrollib, et kinnitusleht
+            // näitab just selle õppejõu andmeid. Pärast kustutamise kinnitamist kontrollib, et ollakse tagasi
+            // indeksis, õppejõu rida on kadunud, ridu on ühe võrra vähem ja vana andmete aadress õppejõudu enam ei näita.
+            string firstName = DataEntry();
+            int rowCountBefore = driver.FindElement(By.Id("IndexTable")).FindElements(By.TagName("tr")).Count;
+
+            /* tegevus 1: avame kustutamise lehe */
+            IWebElement? row = FindLecturerRow(firstName);
+            Assert.NotNull(row);
+            IWebElement indexDeleteButton = row.FindElement(By.Id("IndexTableLecturerDelete_BTN"));
+            indexDeleteButton.Click();
+
+            /* kontroll 1: kinnitusleht näitab õppejõu andmeid */
+            //kogume andmed
+            string lecturerId = driver.Url.Substring((BaseUrl + "Lecturers/Delete/").Length); //kustutatava õppejõu Id aadressist
+            string headingData = driver.FindElement(By.Id("DetailsDelete_Heading")).Text;
+            string subHeadingData = driver.FindElement(By.Id("DetailsDelete_SubHeading")).Text;
+            string idData = driver.FindElement(By.Id("DetailsDelete_Lecturer_Id")).Text;
+            string firstNameData = driver.FindElement(By.Id("DetailsDelete_Lecturer_FirstName")).Text;
+            string lastNameData = driver.FindElement(By.Id("DetailsDelete_Lecturer_LastName")).Text;
+            string qualificationsData = driver.FindElement(By.Id("DetailsDelete_Lecturer_Qualifications")).Text;
+            //assertime
+            Assert.True(Guid.TryParse(lecturerId, out _));
+            Assert.Equal("Kustuta õppejõud", headingData);
+            Assert.Equal("Kas oled kindel, et soovid selle õppejõu kustutada?", subHeadingData);
+            Assert.Equal(lecturerId, idData);
+            Assert.Equal(firstName, firstNameData);
+            Assert.Equal(LecturerLastName, lastNameData);
+            Assert.Equal(LecturerQualifications, qualificationsData);
+
+            /* tegevus 2: kinnitame kustutamise */
+            IWebElement deleteConfirmButton = driver.FindElement(By.Id("DetailsDelete_Delete_BTN"));
+            deleteConfirmButton.Click();
+            lecturerFirstName = null; //õppejõud on juba kustutatud, puhastada pole vaja
+
+            /* kontroll 2: indeks */
+            string indexHeadingData = driver.FindElement(By.Id("IndexHeading")).Text;
+            int rowCountAfter = driver.FindElement(By.Id("IndexTable")).FindElements(By.TagName("tr")).Count;
+            Assert.Equal(BaseUrl + "Lecturers", driver.Url);
+            Assert.Equal("Õppejõud", indexHeadingData);
+            Assert.Null(FindLecturerRow(firstName));
+            Assert.Equal(rowCountBefore - 1, rowCountAfter);
+
+            /* kontroll 3: vana andmete aadress õppejõudu enam ei näita */
+            GoTo("Lecturers/Details/" + lecturerId);
+            Assert.DoesNotContain(lecturerId, driver.PageSource);
+            Assert.DoesNotContain(firstName, driver.PageSource);
+        }
+
         protected override void CleanUp()
         {
             if (lecturerFirstName != null)
