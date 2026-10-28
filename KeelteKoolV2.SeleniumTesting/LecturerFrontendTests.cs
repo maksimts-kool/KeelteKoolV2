@@ -9,6 +9,9 @@ namespace KeelteKoolV2.SeleniumTesting
         // indeks näitab 20 õppejõudu perekonnanime järgi sorteeritult, numbriga algav nimi hoiab testõppejõud nähtaval
         private const string LecturerLastName = "0 Selenium";
         private const string LecturerQualifications = "Automaattestimise õpetaja";
+        // teine andmekomplekt, millega uuendustest kõik väljad üle kirjutab
+        private const string UpdatedLecturerLastName = "0 Selenium uuendatud";
+        private const string UpdatedLecturerQualifications = "Manuaaltestimise õpetaja";
 
         private string? lecturerFirstName;
 
@@ -78,6 +81,75 @@ namespace KeelteKoolV2.SeleniumTesting
             Assert.NotNull(FindLecturerRow(lecturerFirstName));
 
             DataClear(lecturerFirstName);
+        }
+
+        [Fact, TestPriority(3)]
+        public void Should_UpdateLecturer_ShowNewValues_KeepSameRecord()
+        {
+            // Loob uue õppejõu, avab indeksist sama õppejõu muutmisvormi ja kirjutab üle kõik kolm välja
+            // (eesnimi, perekonnanimi, kvalifikatsioon) ning salvestab. Kontrollib, et indeks ja andmete leht
+            // näitavad uusi väärtusi, vanu väärtusi enam ei näidata ning et see on sama kirje:
+            // sama Id aadressis ja andmete lehel ning indeksi ridade arv ei muutunud.
+            string oldFirstName = DataEntry();
+            string updatedFirstName = oldFirstName + " uuendatud";
+            int rowCountBefore = driver.FindElement(By.Id("IndexTable")).FindElements(By.TagName("tr")).Count;
+
+            /* tegevus */
+            IWebElement? row = FindLecturerRow(oldFirstName);
+            Assert.NotNull(row);
+            IWebElement indexUpdateButton = row.FindElement(By.Id("IndexTableLecturerUpdate_BTN"));
+            indexUpdateButton.Click();
+            string lecturerId = driver.Url.Substring((BaseUrl + "Lecturers/Update/").Length); //muudetava õppejõu Id aadressist
+            Assert.True(Guid.TryParse(lecturerId, out _));
+            IWebElement updateEntryFirstName = driver.FindElement(By.Id("CU_Lecturer_FirstName"));
+            Assert.Equal(oldFirstName, updateEntryFirstName.GetDomProperty("value")); //vorm on eeltäidetud
+            updateEntryFirstName.Clear();
+            updateEntryFirstName.SendKeys(updatedFirstName);
+            lecturerFirstName = updatedFirstName;
+            IWebElement updateEntryLastName = driver.FindElement(By.Id("CU_Lecturer_LastName"));
+            Assert.Equal(LecturerLastName, updateEntryLastName.GetDomProperty("value"));
+            updateEntryLastName.Clear();
+            updateEntryLastName.SendKeys(UpdatedLecturerLastName);
+            IWebElement updateEntryQualifications = driver.FindElement(By.Id("CU_Lecturer_Qualifications"));
+            Assert.Equal(LecturerQualifications, updateEntryQualifications.GetDomProperty("value"));
+            updateEntryQualifications.Clear();
+            updateEntryQualifications.SendKeys(UpdatedLecturerQualifications);
+            IWebElement updateSaveButton = driver.FindElement(By.Id("CU_Lecturer_Save_BTN"));
+            updateSaveButton.Click();
+
+            /* kontroll 1: indeks */
+            //kogume andmed
+            string headingData = driver.FindElement(By.Id("IndexHeading")).Text;
+            int rowCountAfter = driver.FindElement(By.Id("IndexTable")).FindElements(By.TagName("tr")).Count;
+            row = FindLecturerRow(updatedFirstName);
+            Assert.NotNull(row);
+            string lecturerFirstNameData = row.FindElement(By.Id("IndexTableLecturerFirstName")).Text;
+            string lecturerLastNameData = row.FindElement(By.Id("IndexTableLecturerLastName")).Text;
+            //assertime
+            Assert.Equal(BaseUrl + "Lecturers", driver.Url);
+            Assert.Equal("Õppejõud", headingData);
+            Assert.Equal(updatedFirstName, lecturerFirstNameData);
+            Assert.Equal(UpdatedLecturerLastName, lecturerLastNameData);
+            Assert.Null(FindLecturerRow(oldFirstName)); //vana nimega rida pole enam
+            Assert.Equal(rowCountBefore, rowCountAfter); //uut rida ei tekkinud
+
+            /* kontroll 2: andmete leht */
+            IWebElement indexDetailsButton = row.FindElement(By.Id("IndexTableLecturerDetails_BTN"));
+            indexDetailsButton.Click();
+            string idData = driver.FindElement(By.Id("DetailsDelete_Lecturer_Id")).Text;
+            string firstNameData = driver.FindElement(By.Id("DetailsDelete_Lecturer_FirstName")).Text;
+            string lastNameData = driver.FindElement(By.Id("DetailsDelete_Lecturer_LastName")).Text;
+            string qualificationsData = driver.FindElement(By.Id("DetailsDelete_Lecturer_Qualifications")).Text;
+            Assert.Equal(BaseUrl + "Lecturers/Details/" + lecturerId, driver.Url); //sama kirje
+            Assert.Equal(lecturerId, idData);
+            Assert.Equal(updatedFirstName, firstNameData);
+            Assert.Equal(UpdatedLecturerLastName, lastNameData);
+            Assert.Equal(UpdatedLecturerQualifications, qualificationsData);
+            Assert.NotEqual(oldFirstName, firstNameData);
+            Assert.NotEqual(LecturerLastName, lastNameData);
+            Assert.NotEqual(LecturerQualifications, qualificationsData);
+
+            DataClear(updatedFirstName);
         }
 
         protected override void CleanUp()
@@ -151,7 +223,7 @@ namespace KeelteKoolV2.SeleniumTesting
             {
                 var firstNameElement = row.FindElement(By.Id("IndexTableLecturerFirstName")).Text;
                 var lastNameElement = row.FindElement(By.Id("IndexTableLecturerLastName")).Text;
-                if (firstNameElement == firstName && lastNameElement == LecturerLastName)
+                if (firstNameElement == firstName && lastNameElement is LecturerLastName or UpdatedLecturerLastName)
                 {
                     return row;
                 }

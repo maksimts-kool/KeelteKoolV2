@@ -28,7 +28,7 @@
                 <td id="IndexTableLecturerLastName">@lecturer.LastName</td>
                 <td>
                     <a id="IndexTableLecturerDetails_BTN" asp-action="Details" asp-controller="Lecturers" asp-route-id="@lecturer.Id" class="btn btn-secondary">Andmed</a>
-                    <a asp-action="Update" asp-controller="Lecturers" asp-route-id="@lecturer.Id" class="btn btn-warning">Uuenda</a>
+                    <a id="IndexTableLecturerUpdate_BTN" asp-action="Update" asp-controller="Lecturers" asp-route-id="@lecturer.Id" class="btn btn-warning">Uuenda</a>
                     <a id="IndexTableLecturerDelete_BTN" asp-action="Delete" asp-controller="Lecturers" asp-route-id="@lecturer.Id" class="btn btn-danger">Kustuta</a>
                 </td>
             </tr>
