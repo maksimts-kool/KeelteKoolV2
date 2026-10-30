@@ -45,6 +45,50 @@ namespace KeelteKoolV2.SeleniumTesting
             DataClear(studentEmail);
         }
 
+        [Fact, TestPriority(2)]
+        public void Should_ReadStudent_ShowDetails()
+        {
+            // Loob samamoodi nagu loomistestis uue õpilase ja avab indeksist selle õpilase andmete lehe.
+            // Kontrollib lehe pealkirju ja aadressi ning et iga välja väärtus (Id, eesnimi, perekonnanimi,
+            // e-post, sünniaeg) on täpselt see, mis loomisel sisestati. Lõpuks kontrollib, et "Tagasi" viib indeksisse.
+            studentEmail = DataEntry();
+
+            /* tegevus */
+            IWebElement? row = FindStudentRow(studentEmail);
+            Assert.NotNull(row);
+            IWebElement indexDetailsButton = row.FindElement(By.Id("IndexTableStudentDetails_BTN"));
+            indexDetailsButton.Click();
+
+            /* kontroll */
+            //kogume andmed
+            string headingData = driver.FindElement(By.Id("DetailsDelete_Heading")).Text;
+            string subHeadingData = driver.FindElement(By.Id("DetailsDelete_SubHeading")).Text;
+            string idData = driver.FindElement(By.Id("DetailsDelete_Student_Id")).Text;
+            string firstNameData = driver.FindElement(By.Id("DetailsDelete_Student_FirstName")).Text;
+            string lastNameData = driver.FindElement(By.Id("DetailsDelete_Student_LastName")).Text;
+            string emailData = driver.FindElement(By.Id("DetailsDelete_Student_Email")).Text;
+            string dateOfBirthData = driver.FindElement(By.Id("DetailsDelete_Student_DateOfBirth")).Text;
+            //assertime
+            Assert.Equal("Andmed", headingData);
+            Assert.Equal("Õpilane", subHeadingData);
+            Assert.True(Guid.TryParse(idData, out _));
+            Assert.Equal(BaseUrl + "Students/Details/" + idData, driver.Url); //leht on just selle õpilase oma
+            Assert.Equal(StudentFirstName, firstNameData);
+            Assert.Equal(StudentLastName, lastNameData);
+            Assert.Equal(studentEmail, emailData);
+            Assert.Equal(StudentDateOfBirthShown, dateOfBirthData);
+
+            /* tegevus 2: tagasi indeksisse */
+            IWebElement detailsBackButton = driver.FindElement(By.Id("DetailsDelete_Back_BTN"));
+            detailsBackButton.Click();
+
+            /* kontroll 2 */
+            Assert.Equal(BaseUrl + "Students", driver.Url);
+            Assert.NotNull(FindStudentRow(studentEmail));
+
+            DataClear(studentEmail);
+        }
+
         protected override void CleanUp()
         {
             if (studentEmail != null)
