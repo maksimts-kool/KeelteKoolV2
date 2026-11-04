@@ -32,7 +32,7 @@
                 <td id="IndexTableStudentDateOfBirth">@student.DateOfBirth?.ToString("dd.MM.yyyy")</td>
                 <td>
                     <a id="IndexTableStudentDetails_BTN" asp-action="Details" asp-controller="Students" asp-route-id="@student.Id" class="btn btn-secondary">Andmed</a>
-                    <a asp-action="Update" asp-controller="Students" asp-route-id="@student.Id" class="btn btn-warning">Uuenda</a>
+                    <a id="IndexTableStudentUpdate_BTN" asp-action="Update" asp-controller="Students" asp-route-id="@student.Id" class="btn btn-warning">Uuenda</a>
                     <a id="IndexTableStudentDelete_BTN" asp-action="Delete" asp-controller="Students" asp-route-id="@student.Id" class="btn btn-danger">Kustuta</a>
                 </td>
             </tr>
