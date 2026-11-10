@@ -240,6 +240,50 @@ namespace KeelteKoolV2.SeleniumTesting
             Assert.Equal(rowCountBefore, rowCountAfter);
         }
 
+        [Fact, TestPriority(6)]
+        public void Should_PrefillUpdateForm_WithSavedValues()
+        {
+            // Loob uue õppejõu, avab selle andmete lehe ja jätab meelde salvestatud väärtused, seejärel vajutab "Muuda".
+            // Kontrollib, et avanes sama õppejõu muutmisvorm (aadress, pealkiri, peidetud Id) ja et iga välja
+            // (eesnimi, perekonnanimi, kvalifikatsioon) sees on juba täpselt see väärtus, mida näitab andmete leht.
+            lecturerFirstName = DataEntry();
+
+            /* tegevus 1: avame andmete lehe ja kogume salvestatud väärtused */
+            IWebElement? row = FindLecturerRow(lecturerFirstName);
+            Assert.NotNull(row);
+            IWebElement indexDetailsButton = row.FindElement(By.Id("IndexTableLecturerDetails_BTN"));
+            indexDetailsButton.Click();
+            string idData = driver.FindElement(By.Id("DetailsDelete_Lecturer_Id")).Text;
+            string firstNameData = driver.FindElement(By.Id("DetailsDelete_Lecturer_FirstName")).Text;
+            string lastNameData = driver.FindElement(By.Id("DetailsDelete_Lecturer_LastName")).Text;
+            string qualificationsData = driver.FindElement(By.Id("DetailsDelete_Lecturer_Qualifications")).Text;
+            //andmete leht näitab loomisel sisestatut, et võrdlus poleks tühi tühjaga
+            Assert.Equal(lecturerFirstName, firstNameData);
+            Assert.Equal(LecturerLastName, lastNameData);
+            Assert.Equal(LecturerQualifications, qualificationsData);
+
+            /* tegevus 2: avame muutmisvormi */
+            IWebElement detailsUpdateButton = driver.FindElement(By.Id("DetailsDelete_Update_BTN"));
+            detailsUpdateButton.Click();
+
+            /* kontroll */
+            //kogume andmed
+            string headingData = driver.FindElement(By.Id("CU_Heading")).Text;
+            string updateEntryId = driver.FindElement(By.Id("Id")).GetDomProperty("value");
+            string updateEntryFirstName = driver.FindElement(By.Id("CU_Lecturer_FirstName")).GetDomProperty("value");
+            string updateEntryLastName = driver.FindElement(By.Id("CU_Lecturer_LastName")).GetDomProperty("value");
+            string updateEntryQualifications = driver.FindElement(By.Id("CU_Lecturer_Qualifications")).GetDomProperty("value");
+            //assertime
+            Assert.Equal(BaseUrl + "Lecturers/Update/" + idData, driver.Url);
+            Assert.Equal("Uuenda õppejõudu", headingData);
+            Assert.Equal(idData, updateEntryId); //vorm salvestab sama kirje
+            Assert.Equal(firstNameData, updateEntryFirstName);
+            Assert.Equal(lastNameData, updateEntryLastName);
+            Assert.Equal(qualificationsData, updateEntryQualifications);
+
+            DataClear(lecturerFirstName);
+        }
+
         protected override void CleanUp()
         {
             if (lecturerFirstName != null)
