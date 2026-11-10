@@ -7,7 +7,8 @@ namespace KeelteKoolV2.Models.Students
         public Guid? Id { get; set; } //optional sest index vaade ei vaja seda
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string Email { get; set; }
+        [EmailAddress]
+        public string Email { get; set; } //vigase e-postiga vormi server ei salvesta ka siis, kui brauseri kontrollist mööda minnakse
         [Required]
         public DateTime? DateOfBirth { get; set; } //nullable, et uue õpilase vormis poleks vaikimisi kuupäeva 01.01.0001
         public string? UserID { get; set; }
