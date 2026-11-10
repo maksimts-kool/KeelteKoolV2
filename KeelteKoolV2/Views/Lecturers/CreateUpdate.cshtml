@@ -5,7 +5,7 @@
     bool isUpdate = Model.Id != null;
 }
 
-<h1>@(isUpdate ? "Uuenda õppejõudu" : "Loo õppejõud")</h1>
+<h1 id="CU_Heading">@(isUpdate ? "Uuenda õppejõudu" : "Loo õppejõud")</h1>
 
 <div>
     <form method="post" enctype="multipart/form-data">
@@ -18,19 +18,19 @@
         <div class="form-group">
             <label asp-for="FirstName" for="CU_Lecturer_FirstName" class="control-label"></label>
             <input asp-for="FirstName" id="CU_Lecturer_FirstName" class="form-control"/>
-            <span asp-validation-for="FirstName" class="text-danger"></span>
+            <span id="CU_Lecturer_FirstName_Validation" asp-validation-for="FirstName" class="text-danger"></span>
         </div>
 
         <div class="form-group">
             <label asp-for="LastName" for="CU_Lecturer_LastName" class="control-label"></label>
             <input asp-for="LastName" id="CU_Lecturer_LastName" class="form-control" />
-            <span asp-validation-for="LastName" class="text-danger"></span>
+            <span id="CU_Lecturer_LastName_Validation" asp-validation-for="LastName" class="text-danger"></span>
         </div>
 
         <div class="form-group">
             <label asp-for="Qualifications" for="CU_Lecturer_Qualifications" class="control-label"></label>
             <input asp-for="Qualifications" id="CU_Lecturer_Qualifications" class="form-control" />
-            <span asp-validation-for="Qualifications" class="text-danger"></span>
+            <span id="CU_Lecturer_Qualifications_Validation" asp-validation-for="Qualifications" class="text-danger"></span>
         </div>
 
         <div class="form-group">
@@ -58,3 +58,8 @@
 
     </form>
 </div>
+
+@* kliendipoolne valideerimine, et tühja kohustusliku väljaga vorm jääks lehele ja näitaks teadet *@
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

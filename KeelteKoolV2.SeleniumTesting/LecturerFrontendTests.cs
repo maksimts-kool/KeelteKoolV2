@@ -204,6 +204,42 @@ namespace KeelteKoolV2.SeleniumTesting
             Assert.DoesNotContain(firstName, driver.PageSource);
         }
 
+        [Fact, TestPriority(5)]
+        public void Should_NotCreateLecturer_WhenRequiredFieldsEmpty()
+        {
+            // Avab õppejõu loomise vormi ja vajutab "Loo õppejõud", jättes kohustuslikud väljad (eesnimi,
+            // perekonnanimi) tühjaks. Kontrollib, et jäädakse loomise lehele, mõlema tühja välja juures on
+            // eestikeelne veateade (valikulise kvalifikatsiooni juures mitte) ja indeksisse uut rida ei tekkinud.
+            GoTo("Lecturers");
+            int rowCountBefore = driver.FindElement(By.Id("IndexTable")).FindElements(By.TagName("tr")).Count;
+
+            /* tegevus */
+            IWebElement indexCreateButton = driver.FindElement(By.Id("IndexCreateNewLecturer_BTN"));
+            indexCreateButton.Click();
+            IWebElement createSaveButton = driver.FindElement(By.Id("CU_Lecturer_Create_BTN"));
+            createSaveButton.Click();
+
+            /* kontroll 1: jäime loomise lehele ja näeme veateateid */
+            //kogume andmed
+            string headingData = driver.FindElement(By.Id("CU_Heading")).Text;
+            IWebElement firstNameValidation = driver.FindElement(By.Id("CU_Lecturer_FirstName_Validation"));
+            IWebElement lastNameValidation = driver.FindElement(By.Id("CU_Lecturer_LastName_Validation"));
+            string qualificationsValidationData = driver.FindElement(By.Id("CU_Lecturer_Qualifications_Validation")).Text;
+            //assertime
+            Assert.Equal(BaseUrl + "Lecturers/Create", driver.Url);
+            Assert.Equal("Loo õppejõud", headingData);
+            Assert.True(firstNameValidation.Displayed);
+            Assert.Equal("Eesnimi on kohustuslik", firstNameValidation.Text);
+            Assert.True(lastNameValidation.Displayed);
+            Assert.Equal("Perekonnanimi on kohustuslik", lastNameValidation.Text);
+            Assert.Equal("", qualificationsValidationData); //kvalifikatsioon pole kohustuslik
+
+            /* kontroll 2: indeksisse uut rida ei tekkinud */
+            GoTo("Lecturers");
+            int rowCountAfter = driver.FindElement(By.Id("IndexTable")).FindElements(By.TagName("tr")).Count;
+            Assert.Equal(rowCountBefore, rowCountAfter);
+        }
+
         protected override void CleanUp()
         {
             if (lecturerFirstName != null)
