@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using KeelteKoolV2.Core.Domain;
 using KeelteKoolV2.Core.DTO;
 using KeelteKoolV2.Core.ServiceInterface;
@@ -23,6 +24,11 @@ public class StudentsServices : IStudentsServices
         }
         //eesnimi, perekonnanimi ja e-post on kohustuslikud
         if (string.IsNullOrEmpty(dto.FirstName) || string.IsNullOrEmpty(dto.LastName) || string.IsNullOrEmpty(dto.Email))
+        {
+            return null;
+        }
+        //e-post peab olema õigel kujul, muidu saaks brauseri kontrollist mööda minnes vigase e-posti salvestada
+        if (!new EmailAddressAttribute().IsValid(dto.Email))
         {
             return null;
         }

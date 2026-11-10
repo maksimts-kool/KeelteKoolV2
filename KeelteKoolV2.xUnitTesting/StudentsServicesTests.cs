@@ -131,6 +131,25 @@ public class StudentsServicesTests : TestBase
     }
 
     [Fact]
+    //oma test: vigase e-postiga õpilast ei lisata
+    public async Task ShouldNot_AddNewStudent_WhenEmailIsInvalid()
+    {
+        //ülesseade
+        StudentDTO invalidEmail = MockStudentDTOData();
+        invalidEmail.Email = "maksim.at.mail";
+
+        //tegevus
+        var resultInvalidEmail = await Svc<IStudentsServices>().Create(invalidEmail);
+        var resultValid = await Svc<IStudentsServices>().Create(MockStudentDTOData());
+
+        //kontroll
+        Assert.Null(resultInvalidEmail);
+        //õige e-postiga õpilane lisatakse ikkagi
+        Assert.NotNull(resultValid);
+        Assert.Equal("juku.kask@example.com", resultValid.Email);
+    }
+
+    [Fact]
     //oma test: tundmatu id-ga õpilast ei leita
     public async Task Should_ReturnNull_WhenStudentIdDoesNotExist()
     {
