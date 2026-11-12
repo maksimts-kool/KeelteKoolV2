@@ -20,8 +20,14 @@ namespace KeelteKoolV2.SeleniumTesting
         private const string UpdatedStudentFirstName = "Automaattestija uuendatud";
         // e-post ilma @ märgita, mille brauser peab tagasi lükkama
         private const string InvalidStudentEmail = "maksim.at.mail";
+        // kahe õpilase testis on teisel õpilasel kõik väljad erinevad, et segiminekut märgata
+        private const string SecondStudentFirstName = "Teine testija";
+        private const string SecondStudentLastName = "0 Selenium teine";
+        private const string SecondStudentDateOfBirthInput = "2004-11-02";
+        private const string SecondStudentDateOfBirthShown = "02.11.2004";
 
         private string? studentEmail;
+        private string? secondStudentEmail;
 
         [Fact, TestPriority(1)]
         public void Should_CreateStudent_WithCorrectData_ShowInIndex()
@@ -332,11 +338,121 @@ namespace KeelteKoolV2.SeleniumTesting
             DataClear(email);
         }
 
+        [Fact, TestPriority(7)]
+        public void Should_OpenStudentsFromNavbar_ShowListPageStructure()
+        {
+            // Avab avalehe ja vajutab menüüs lingile "Õpilased".
+            // Kontrollib, et avanes õpilaste indeks (aadress, lehe pealkiri ja sakk), tabeli päises on
+            // täpselt oodatud veerud õiges järjekorras ning "Lisa uus õpilane" nupp on olemas ja viib loomise lehele.
+            GoTo("");
+
+            /* tegevus */
+            IWebElement navigateToStudents = driver.FindElement(By.LinkText("Õpilased"));
+            navigateToStudents.Click();
+
+            /* kontroll 1: indeksi leht */
+            //kogume andmed
+            string headingData = driver.FindElement(By.Id("IndexHeading")).Text;
+            IWebElement tableOfIndex = driver.FindElement(By.Id("IndexTable"));
+            List<string> columnData = new List<string>();
+            foreach (var column in tableOfIndex.FindElement(By.TagName("thead")).FindElements(By.TagName("th")))
+            {
+                columnData.Add(column.Text);
+            }
+            IWebElement indexCreateButton = driver.FindElement(By.Id("IndexCreateNewStudent_BTN"));
+            //assertime
+            Assert.Equal(BaseUrl + "Students", driver.Url);
+            Assert.Equal("Õpilased", headingData);
+            Assert.Equal("Õpilased - KeelteKoolV2", driver.Title);
+            Assert.Equal(new List<string> { "Nr", "Eesnimi", "Perekonnanimi", "E-post", "Sünniaeg", "Tegevused" }, columnData);
+            Assert.True(indexCreateButton.Displayed);
+            Assert.Equal("Lisa uus õpilane", indexCreateButton.Text);
+
+            /* tegevus 2: loomise nupp */
+            indexCreateButton.Click();
+
+            /* kontroll 2: avanes loomise leht */
+            string createHeadingData = driver.FindElement(By.Id("CU_Heading")).Text;
+            Assert.Equal(BaseUrl + "Students/Create", driver.Url);
+            Assert.Equal("Loo õpilane", createHeadingData);
+        }
+
+        [Fact, TestPriority(8)]
+        public void Should_CreateTwoStudents_ShowBothSeparately()
+        {
+            // Loob järjest kaks õpilast, kelle kõik väljad on erinevad (eesnimi, perekonnanimi, e-post, sünniaeg).
+            // Kontrollib, et indeksis on ridu täpselt kahe võrra rohkem, mõlemal õpilasel on oma rida oma
+            // väärtustega (teine ei kirjutanud esimest üle ega läinud segamini) ning kummagi "Andmed" nupp
+            // avab just selle õpilase andmed, kahel õpilasel on erinev Id.
+            GoTo("Students");
+            int rowCountBefore = driver.FindElement(By.Id("IndexTable")).FindElements(By.TagName("tr")).Count;
+            string firstEmail = UniqueValue("automaattestija") + "@selenium.ee";
+            string secondEmail = UniqueValue("teinetestija") + "@selenium.ee";
+
+            /* tegevus */
+            studentEmail = firstEmail;
+            CreateStudent(firstEmail, StudentFirstName, StudentLastName, StudentDateOfBirthInput);
+            secondStudentEmail = secondEmail;
+            CreateStudent(secondEmail, SecondStudentFirstName, SecondStudentLastName, SecondStudentDateOfBirthInput);
+
+            /* kontroll 1: indeksis on kaks eraldi rida */
+            //kogume andmed
+            int rowCountAfter = driver.FindElement(By.Id("IndexTable")).FindElements(By.TagName("tr")).Count;
+            IWebElement? firstRow = FindStudentRow(firstEmail);
+            IWebElement? secondRow = FindStudentRow(secondEmail);
+            Assert.NotNull(firstRow);
+            Assert.NotNull(secondRow);
+            //assertime
+            Assert.Equal(BaseUrl + "Students", driver.Url);
+            Assert.Equal(rowCountBefore + 2, rowCountAfter);
+            Assert.Equal(StudentFirstName, firstRow.FindElement(By.Id("IndexTableStudentFirstName")).Text);
+            Assert.Equal(StudentLastName, firstRow.FindElement(By.Id("IndexTableStudentLastName")).Text);
+            Assert.Equal(firstEmail, firstRow.FindElement(By.Id("IndexTableStudentEmail")).Text);
+            Assert.Equal(StudentDateOfBirthShown, firstRow.FindElement(By.Id("IndexTableStudentDateOfBirth")).Text);
+            Assert.Equal(SecondStudentFirstName, secondRow.FindElement(By.Id("IndexTableStudentFirstName")).Text);
+            Assert.Equal(SecondStudentLastName, secondRow.FindElement(By.Id("IndexTableStudentLastName")).Text);
+            Assert.Equal(secondEmail, secondRow.FindElement(By.Id("IndexTableStudentEmail")).Text);
+            Assert.Equal(SecondStudentDateOfBirthShown, secondRow.FindElement(By.Id("IndexTableStudentDateOfBirth")).Text);
+
+            /* tegevus 2: esimese õpilase andmed */
+            firstRow.FindElement(By.Id("IndexTableStudentDetails_BTN")).Click();
+
+            /* kontroll 2 */
+            string firstIdData = driver.FindElement(By.Id("DetailsDelete_Student_Id")).Text;
+            Assert.Equal(BaseUrl + "Students/Details/" + firstIdData, driver.Url);
+            Assert.Equal(StudentFirstName, driver.FindElement(By.Id("DetailsDelete_Student_FirstName")).Text);
+            Assert.Equal(StudentLastName, driver.FindElement(By.Id("DetailsDelete_Student_LastName")).Text);
+            Assert.Equal(firstEmail, driver.FindElement(By.Id("DetailsDelete_Student_Email")).Text);
+            Assert.Equal(StudentDateOfBirthShown, driver.FindElement(By.Id("DetailsDelete_Student_DateOfBirth")).Text);
+
+            /* tegevus 3: teise õpilase andmed */
+            GoTo("Students");
+            secondRow = FindStudentRow(secondEmail);
+            Assert.NotNull(secondRow);
+            secondRow.FindElement(By.Id("IndexTableStudentDetails_BTN")).Click();
+
+            /* kontroll 3 */
+            string secondIdData = driver.FindElement(By.Id("DetailsDelete_Student_Id")).Text;
+            Assert.Equal(BaseUrl + "Students/Details/" + secondIdData, driver.Url);
+            Assert.Equal(SecondStudentFirstName, driver.FindElement(By.Id("DetailsDelete_Student_FirstName")).Text);
+            Assert.Equal(SecondStudentLastName, driver.FindElement(By.Id("DetailsDelete_Student_LastName")).Text);
+            Assert.Equal(secondEmail, driver.FindElement(By.Id("DetailsDelete_Student_Email")).Text);
+            Assert.Equal(SecondStudentDateOfBirthShown, driver.FindElement(By.Id("DetailsDelete_Student_DateOfBirth")).Text);
+            Assert.NotEqual(firstIdData, secondIdData); //kaks eraldi kirjet
+
+            DataClear(firstEmail);
+            DataClear(secondEmail);
+        }
+
         protected override void CleanUp()
         {
             if (studentEmail != null)
             {
                 DeleteStudent(studentEmail);
+            }
+            if (secondStudentEmail != null)
+            {
+                DeleteStudent(secondStudentEmail);
             }
         }
 
@@ -345,7 +461,7 @@ namespace KeelteKoolV2.SeleniumTesting
         {
             string email = UniqueValue("automaattestija") + "@selenium.ee";
             studentEmail = email;
-            CreateStudent(email);
+            CreateStudent(email, StudentFirstName, StudentLastName, StudentDateOfBirthInput);
             return email;
         }
 
@@ -357,9 +473,13 @@ namespace KeelteKoolV2.SeleniumTesting
             {
                 studentEmail = null;
             }
+            if (secondStudentEmail == email)
+            {
+                secondStudentEmail = null;
+            }
         }
 
-        private void CreateStudent(string email)
+        private void CreateStudent(string email, string firstName, string lastName, string dateOfBirthInput)
         {
             GoTo("");
             IWebElement navigateToStudents = driver.FindElement(By.LinkText("Õpilased")); //otsime testitava osa lingi
@@ -368,14 +488,14 @@ namespace KeelteKoolV2.SeleniumTesting
             IWebElement indexCreateButton = driver.FindElement(By.Id("IndexCreateNewStudent_BTN"));
             indexCreateButton.Click();
             IWebElement createEntryFirstName = driver.FindElement(By.Id("CU_Student_FirstName"));
-            createEntryFirstName.SendKeys(StudentFirstName);
+            createEntryFirstName.SendKeys(firstName);
             IWebElement createEntryLastName = driver.FindElement(By.Id("CU_Student_LastName"));
-            createEntryLastName.SendKeys(StudentLastName);
+            createEntryLastName.SendKeys(lastName);
             IWebElement createEntryEmail = driver.FindElement(By.Id("CU_Student_Email"));
             createEntryEmail.SendKeys(email);
             IWebElement createEntryDateOfBirth = driver.FindElement(By.Id("CU_Student_DateOfBirth"));
             //kuupäevavälja klahvidega täitmine sõltub brauseri keelest, seega paneme väärtuse otse
-            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].value = arguments[1];", createEntryDateOfBirth, StudentDateOfBirthInput);
+            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].value = arguments[1];", createEntryDateOfBirth, dateOfBirthInput);
             IWebElement createSaveButton = driver.FindElement(By.Id("CU_Student_Create_BTN"));
             createSaveButton.Click();
         }
