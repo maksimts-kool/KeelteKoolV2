@@ -12,6 +12,10 @@ namespace KeelteKoolV2.SeleniumTesting
         // teine andmekomplekt, millega uuendustest kõik väljad üle kirjutab
         private const string UpdatedLecturerLastName = "0 Selenium uuendatud";
         private const string UpdatedLecturerQualifications = "Manuaaltestimise õpetaja";
+        // täpitähtedega andmekomplekt, sisaldab kõiki eesti erimärke õ ä ö ü š ž (ja suurtähte Õ)
+        private const string EstonianLecturerFirstNamePrefix = "Jüri ";
+        private const string EstonianLecturerLastName = "0 Õunapuu õäöüšž";
+        private const string EstonianLecturerQualifications = "Täpitähtede õpetaja: õ ä ö ü š ž";
 
         private string? lecturerFirstName;
 
@@ -324,6 +328,60 @@ namespace KeelteKoolV2.SeleniumTesting
             DataClear(lecturerFirstName);
         }
 
+        [Fact, TestPriority(8)]
+        public void Should_CreateLecturer_WithEstonianCharacters_ShowExactly()
+        {
+            // Loob vormi kaudu õppejõu, kelle eesnimes, perekonnanimes ja kvalifikatsioonis on eesti täpitähed
+            // (õ ä ö ü š ž, ka suurtäht Õ). Kontrollib, et indeks ja andmete leht näitavad nime ja kvalifikatsiooni
+            // täpselt nii, nagu sisestati: tähti pole asendatud küsimärkidega, need pole katki kodeeritud (nt "Ã¼")
+            // ega jäänud HTML-olemiteks (nt "&#xFC;").
+            lecturerFirstName = DataEntry(EstonianLecturerFirstNamePrefix, EstonianLecturerLastName, EstonianLecturerQualifications);
+
+            /* kontroll 1: indeks */
+            //kogume andmed
+            IWebElement? row = FindLecturerRow(lecturerFirstName);
+            Assert.NotNull(row);
+            string lecturerFirstNameData = row.FindElement(By.Id("IndexTableLecturerFirstName")).Text;
+            string lecturerLastNameData = row.FindElement(By.Id("IndexTableLecturerLastName")).Text;
+            //assertime
+            Assert.Equal(BaseUrl + "Lecturers", driver.Url);
+            Assert.StartsWith(EstonianLecturerFirstNamePrefix, lecturerFirstNameData);
+            Assert.Equal(lecturerFirstName, lecturerFirstNameData);
+            Assert.Equal(EstonianLecturerLastName, lecturerLastNameData);
+            AssertNotBroken(lecturerFirstNameData);
+            AssertNotBroken(lecturerLastNameData);
+
+            /* tegevus: avame andmete lehe */
+            IWebElement indexDetailsButton = row.FindElement(By.Id("IndexTableLecturerDetails_BTN"));
+            indexDetailsButton.Click();
+
+            /* kontroll 2: andmete leht */
+            //kogume andmed
+            string firstNameData = driver.FindElement(By.Id("DetailsDelete_Lecturer_FirstName")).Text;
+            string lastNameData = driver.FindElement(By.Id("DetailsDelete_Lecturer_LastName")).Text;
+            string qualificationsData = driver.FindElement(By.Id("DetailsDelete_Lecturer_Qualifications")).Text;
+            //assertime
+            Assert.StartsWith(BaseUrl + "Lecturers/Details/", driver.Url);
+            Assert.Equal(lecturerFirstName, firstNameData);
+            Assert.Equal(EstonianLecturerLastName, lastNameData);
+            Assert.Equal(EstonianLecturerQualifications, qualificationsData);
+            AssertNotBroken(firstNameData);
+            AssertNotBroken(lastNameData);
+            AssertNotBroken(qualificationsData);
+
+            DataClear(lecturerFirstName);
+        }
+
+        // täpitähed ei tohi lehel muutuda küsimärgiks, asendusmärgiks, katkiseks UTF-8-ks ega HTML-olemiks
+        private static void AssertNotBroken(string text)
+        {
+            Assert.DoesNotContain("?", text);
+            Assert.DoesNotContain("�", text); //asendusmärk �
+            Assert.DoesNotContain("Ã", text); //UTF-8 loetud kui Latin-1, nt "ü" -> "Ã¼"
+            Assert.DoesNotContain("&#", text);
+            Assert.DoesNotContain("&amp;", text);
+        }
+
         protected override void CleanUp()
         {
             if (lecturerFirstName != null)
@@ -333,11 +391,12 @@ namespace KeelteKoolV2.SeleniumTesting
         }
 
         // sisestab unikaalse eesnimega testõppejõu ja tagastab selle eesnime, Dispose puhastab õppejõu ka siis, kui test kukub
-        private string DataEntry()
+        private string DataEntry(string firstNamePrefix = "Automaattestija ", string lastName = LecturerLastName,
+            string qualifications = LecturerQualifications)
         {
-            string firstName = UniqueValue("Automaattestija ");
+            string firstName = UniqueValue(firstNamePrefix);
             lecturerFirstName = firstName;
-            CreateLecturer(firstName);
+            CreateLecturer(firstName, lastName, qualifications);
             return firstName;
         }
 
@@ -351,7 +410,7 @@ namespace KeelteKoolV2.SeleniumTesting
             }
         }
 
-        private void CreateLecturer(string firstName)
+        private void CreateLecturer(string firstName, string lastName, string qualifications)
         {
             GoTo("");
             IWebElement navigateToLecturers = driver.FindElement(By.LinkText("Õppejõud")); //otsime testitava osa lingi
@@ -362,9 +421,9 @@ namespace KeelteKoolV2.SeleniumTesting
             IWebElement createEntryFirstName = driver.FindElement(By.Id("CU_Lecturer_FirstName"));
             createEntryFirstName.SendKeys(firstName);
             IWebElement createEntryLastName = driver.FindElement(By.Id("CU_Lecturer_LastName"));
-            createEntryLastName.SendKeys(LecturerLastName);
+            createEntryLastName.SendKeys(lastName);
             IWebElement createEntryQualifications = driver.FindElement(By.Id("CU_Lecturer_Qualifications"));
-            createEntryQualifications.SendKeys(LecturerQualifications);
+            createEntryQualifications.SendKeys(qualifications);
             IWebElement createSaveButton = driver.FindElement(By.Id("CU_Lecturer_Create_BTN"));
             createSaveButton.Click();
         }
@@ -395,7 +454,7 @@ namespace KeelteKoolV2.SeleniumTesting
             {
                 var firstNameElement = row.FindElement(By.Id("IndexTableLecturerFirstName")).Text;
                 var lastNameElement = row.FindElement(By.Id("IndexTableLecturerLastName")).Text;
-                if (firstNameElement == firstName && lastNameElement is LecturerLastName or UpdatedLecturerLastName)
+                if (firstNameElement == firstName && lastNameElement is LecturerLastName or UpdatedLecturerLastName or EstonianLecturerLastName)
                 {
                     return row;
                 }
