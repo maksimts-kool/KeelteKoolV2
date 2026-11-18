@@ -14,10 +14,6 @@ repository root:
 dotnet ef database update --project KeelteKoolV2.Data --startup-project KeelteKoolV2
 ```
 
-Tests do not need any existing rows: every test creates its own data with a
-unique value (see `UniqueValue`) and deletes it again in `CleanUp`, even when
-the test fails.
-
 ## Running
 
 From the repository root, start the application in one terminal:
@@ -61,24 +57,3 @@ SELENIUM_SLOWMO=700 dotnet test KeelteKoolV2.SeleniumTesting/KeelteKoolV2.Seleni
 
 In PowerShell, use `$env:SELENIUM_BASE_URL` etc. to set these before running
 `dotnet test`.
-
-## Writing a new test class
-
-Inherit from `SeleniumTestBase`. Each test gets a fresh Firefox (xUnit creates a
-new class instance per test). The base gives you:
-
-- `driver` and `wait` (a `WebDriverWait` with the shared timeout)
-- `GoTo("Students")` to open a page relative to the base URL
-- `WaitUntilVisible(By)` and `WaitUntilUrlContains(string)` for explicit waits
-- `UniqueValue(prefix)` for data your test can find again
-- `CleanUp()` to override for deleting the test's own data
-
-To run tests in a fixed order, put
-`[TestCaseOrderer("KeelteKoolV2.SeleniumTesting.PriorityOrderer", "KeelteKoolV2.SeleniumTesting")]`
-on the class and `[TestPriority(n)]` on each test (see `TestOrdering.cs`).
-Add a short Estonian summary at the top of every test: what it does and what it
-checks.
-
-`LanguageCourseFrontendTests` is the reference example: four tests (create,
-read, update, delete), each creating a language course through the form,
-checking the result in the UI and deleting the course again.
