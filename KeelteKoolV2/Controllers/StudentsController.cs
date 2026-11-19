@@ -26,6 +26,7 @@ namespace KeelteKoolV2.Controllers
                     FirstName = x.FirstName,
                     LastName = x.LastName,
                     Email = x.Email,
+                    DateOfBirth = x.DateOfBirth,
                 }).OrderBy(x => x.LastName).Take(20);
             return View(result);
         }

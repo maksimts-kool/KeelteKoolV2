@@ -1,17 +1,11 @@
 using OpenQA.Selenium;
-using OpenQA.Selenium.Firefox;
-using OpenQA.Selenium.Support.Events;
 using Xunit;
-using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace KeelteKoolV2.SeleniumTesting
 {
     [TestCaseOrderer("KeelteKoolV2.SeleniumTesting.PriorityOrderer", "KeelteKoolV2.SeleniumTesting")]
-    public class LanguageCourseFrontendTests : IDisposable
+    public class LanguageCourseFrontendTests : SeleniumTestBase
     {
-        private static readonly string BaseUrl = Environment.GetEnvironmentVariable("SELENIUM_BASE_URL")
-            ?? "http://localhost:5117/"; //navigeeritav aadress
         // indeks näitab 20 kursust Keele järgi sorteeritult, numbriga algav keel hoiab testkursused nähtaval
         private const string CourseKeel = "0 Selenium";
         // teine andmekomplekt, millega uuendustest kõik väljad üle kirjutab
@@ -19,36 +13,7 @@ namespace KeelteKoolV2.SeleniumTesting
         private const string UpdatedCourseTase = "4";
         private const string UpdatedCourseKirjeldus = "Kursusel õpime manuaaltestimist.";
 
-        private readonly IWebDriver driver;
         private string? courseName;
-
-        public LanguageCourseFrontendTests()
-        {
-            var options = new FirefoxOptions();
-            /* if (!string.Equals(Environment.GetEnvironmentVariable("SELENIUM_HEADLESS"),
-                    "false", StringComparison.OrdinalIgnoreCase))
-            {
-                options.AddArgument("-headless");
-            } */
-
-            var firefoxDriver = new FirefoxDriver(options);
-
-            // SELENIUM_SLOWMO=<millisekundit> aeglustab iga klikki, tekstisisestust ja navigeerimist, et brauserit jälgida
-            if (int.TryParse(Environment.GetEnvironmentVariable("SELENIUM_SLOWMO"), out int slowMoMs) && slowMoMs > 0)
-            {
-                var eventDriver = new EventFiringWebDriver(firefoxDriver);
-                eventDriver.ElementClicked += (_, _) => Thread.Sleep(slowMoMs);
-                eventDriver.ElementValueChanged += (_, _) => Thread.Sleep(slowMoMs);
-                eventDriver.Navigated += (_, _) => Thread.Sleep(slowMoMs);
-                driver = eventDriver;
-            }
-            else
-            {
-                driver = firefoxDriver;
-            }
-
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
-        }
 
         [Fact, TestPriority(1)]
         public void Should_CreateLanguageCourse_WithCorrectData_ShowInIndex()
@@ -199,26 +164,18 @@ namespace KeelteKoolV2.SeleniumTesting
             Assert.Null(FindCourseRow(name));
         }
 
-        public void Dispose()
+        protected override void CleanUp()
         {
-            try
+            if (courseName != null)
             {
-                if (courseName != null)
-                {
-                    DeleteLanguageCourse(courseName);
-                }
-            }
-            finally
-            {
-                driver.Dispose();
-                GC.SuppressFinalize(this);
+                DeleteLanguageCourse(courseName);
             }
         }
 
         // sisestab unikaalse nimega testkursuse ja tagastab selle nime, Dispose puhastab kursuse ka siis, kui test kukub
         private string DataEntry()
         {
-            string name = $"Automaattestimise kursus {Guid.NewGuid():N}";
+            string name = UniqueValue("Automaattestimise kursus ");
             courseName = name;
             CreateLanguageCourse(name);
             return name;
@@ -236,7 +193,7 @@ namespace KeelteKoolV2.SeleniumTesting
 
         private void CreateLanguageCourse(string name)
         {
-            driver.Url = BaseUrl;
+            GoTo("");
             IWebElement navigateToLanguageCourse = driver.FindElement(By.LinkText("Keelekursused")); //otsime testitava osa lingi
             navigateToLanguageCourse.Click(); //simuleeritud tegevus elemendiga, antud juhul klikk
 
@@ -256,7 +213,7 @@ namespace KeelteKoolV2.SeleniumTesting
 
         private void DeleteLanguageCourse(string name)
         {
-            driver.Url = BaseUrl + "LanguageCourses";
+            GoTo("LanguageCourses");
             IWebElement? row = FindCourseRow(name);
             if (row == null)
             {
@@ -287,39 +244,6 @@ namespace KeelteKoolV2.SeleniumTesting
             }
 
             return null;
-        }
-    }
-
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-    public class TestPriorityAttribute : Attribute
-    {
-        public int Priority { get; }
-
-        public TestPriorityAttribute(int priority)
-        {
-            Priority = priority;
-        }
-    }
-
-    // Kasutus: [TestCaseOrderer("KeelteKoolV2.SeleniumTesting.PriorityOrderer", "KeelteKoolV2.SeleniumTesting")] klassil
-    // ja [TestPriority(n)] meetodil. Väiksem number jookseb enne, märgistamata testid jooksevad viimasena.
-    public class PriorityOrderer : ITestCaseOrderer
-    {
-        public IEnumerable<TTestCase> OrderTestCases<TTestCase>(IEnumerable<TTestCase> testCases)
-            where TTestCase : ITestCase
-        {
-            return testCases
-                .OrderBy(GetPriority)
-                .ThenBy(tc => tc.TestMethod.Method.Name);
-        }
-
-        private static int GetPriority<TTestCase>(TTestCase testCase) where TTestCase : ITestCase
-        {
-            IAttributeInfo? attribute = testCase.TestMethod.Method
-                .GetCustomAttributes(typeof(TestPriorityAttribute).AssemblyQualifiedName)
-                .FirstOrDefault();
-
-            return attribute is null ? int.MaxValue : Convert.ToInt32(attribute.GetConstructorArguments().First());
         }
     }
 }

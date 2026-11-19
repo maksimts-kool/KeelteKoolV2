@@ -1,9 +1,13 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace KeelteKoolV2.Models.Lecturers
 {
     public class LecturerViewModel
     {
         public Guid? Id { get; set; } //optional sest index vaade ei vaja seda
+        [Required(ErrorMessage = "Eesnimi on kohustuslik")] //eestikeelne teade vormi valideerimisel
         public string FirstName { get; set; }
+        [Required(ErrorMessage = "Perekonnanimi on kohustuslik")]
         public string LastName { get; set; }
         public string? Qualifications { get; set; }
         public string? UserID { get; set; }
